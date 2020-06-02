@@ -1,19 +1,7 @@
 <template>
   <div>
-    <el-form :inline="true" :model="formInline" class="searchBox">
-      <el-form-item label="职位:">
-        <el-input size="small" v-model="formInline.name" placeholder="职位"></el-input>
-      </el-form-item>
-      <el-form-item label="学历要求:">
-        <el-input size="small" v-model="formInline.educational_background" placeholder="学历要求"></el-input>
-      </el-form-item>
-
-      <el-form-item>
-        <el-button size="small" type="primary" icon="el-icon-search" @click="getList">查询</el-button>
-      </el-form-item>
-    </el-form>
     <div class="btnBox">
-      <el-button type="success" size="small" icon="el-icon-plus" @click="addBtn">新增</el-button>
+      <el-button type="success" size="small" icon="el-icon-plus" @click="addBtn">新建创意</el-button>
       <!--      <el-button type="danger" size="small">删除</el-button>-->
     </div>
     <!--    @row-contextmenu="rowContextmenu"-->
@@ -27,9 +15,7 @@
       header-row-class-name="table_row"
       highlight-current-row
       stripe
-      border
       lazy
-      :row-class-name="tableRowClassName"
       style="width: 100%">
       <!--      type="index"-->
       <el-table-column
@@ -42,49 +28,31 @@
         <!--        </template>-->
       </el-table-column>
       <el-table-column
+        prop="responsibilities"
+        align="center"
+        label="开关"
+        width="100">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.responsibilities"
+            active-color="#13ce66"
+            inactive-color="#ff4949">
+          </el-switch>
+        </template>
+      </el-table-column>
+
+      <el-table-column
         prop="name"
         align="center"
-        label="职位"
+        label="组ID"
         width="200">
       </el-table-column>
       <el-table-column
         prop="experience"
         align="center"
-        label="工作经验"
-        width="100">
+        label="创意组名称">
       </el-table-column>
 
-      <el-table-column
-        prop="number"
-        align="center"
-        label="需求人数"
-        width="100">
-      </el-table-column>
-      <el-table-column
-        prop="educational_background"
-        align="center"
-        label="学历要求"
-        width="120">
-      </el-table-column>
-      <!--      show-overflow-tooltip-->
-      <el-table-column
-        prop="responsibilities"
-        align="center"
-        label="岗位描述"
-        min-width="120">
-        <template slot-scope="scope">
-          <p class="requirements_style">{{ scope.row.responsibilities }}</p>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="requirements"
-        align="center"
-        label="岗位要求"
-        min-width="120">
-        <template slot-scope="scope">
-          <p class="requirements_style">{{ scope.row.requirements }}</p>
-        </template>
-      </el-table-column>
       <el-table-column
         fixed="right"
         align="center"
@@ -92,7 +60,6 @@
         width="150">
         <template slot-scope="scope">
           <el-button  @click="editBtn(scope.row)" icon="el-icon-edit" type="text" size="small">编辑</el-button>
-
 
           <el-popconfirm
             confirmButtonText='好的'
@@ -132,12 +99,9 @@
     data() {
       return {
         user_id:"",
-        formInline: {
-          name: '',
-          educational_background:''
-        },
-        tableData: [],
-        allData:[],
+
+        tableData: [{},{},{},{},{},{},{},{},{},],
+
         currentPage:1,
         total:0,
         pageSize:10,
@@ -146,29 +110,15 @@
       }
     },
     created() {
-      this.user_id = JSON.parse(window.sessionStorage.getItem("user_profile")).id;
+      // this.user_id = JSON.parse(window.sessionStorage.getItem("user_profile")).id;
       this.getList();
-      requestServices.jobsList()
-        .then(res=>{
-          this.allData = res.result.jobs;
-        })
     },
 
     methods: {
-      tableRowClassName({row, rowIndex}) {
-        if (rowIndex === 1) {
-          return 'warning-row';
-        } else if (rowIndex === 3) {
-          return 'success-row';
-        }
-        return '';
-      },
 
       getList(){
         this.loading = true
         requestServices.jobsList({
-          name:this.formInline.name,
-          educational_background:this.formInline.educational_background,
           page_start:this.currentPage,
           page_count:this.pageSize
         }).then(res=>{
@@ -183,19 +133,17 @@
         })
       },
       addBtn(){
-        this.$router.push({name:"job-edit"})
+        this.$router.push({name:"creative-edit"})
       },
       //查看
       editBtn(row) {
         this.$router.push({
-          name:"job-edit",
+          name:"creative-edit",
           params:row
         })
       },
       //删除
       delBtn(id){
-
-
         requestServices.delJobs({
           job_id:id,
           user_id:this.user_id
@@ -223,9 +171,7 @@
   }
 </script>
 <style lang="less" scoped>
-  .searchBox{
-    border-bottom: 1px solid #b5c6d4;
-  }
+
   .btnBox{
     margin: 10px 0;
   }

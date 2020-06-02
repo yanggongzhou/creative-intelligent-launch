@@ -26,6 +26,11 @@ const router = new Router({
           name: 'creative-list',
           component: ()=>import ('@/components/creative/creative-list'),
         },
+        {
+          path: '/creative/edit',
+          name: 'creative-edit',
+          component: ()=>import ('@/components/creative/creative-edit'),
+        },
       ]
     }
   ]

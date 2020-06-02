@@ -5,7 +5,7 @@
         迈吉客科技
       </div>
       <div class="header_btn float_right">
-        <el-button type="default" plain>退出登录</el-button>
+        <el-button type="default" @click="loginOutEve" plain>退出登录</el-button>
       </div>
 
 
@@ -33,7 +33,7 @@
       }
     },
     created() {
-      this.userName = JSON.parse(window.sessionStorage.getItem("user_profile")).user_name
+      // this.userName = JSON.parse(window.sessionStorage.getItem("user_profile")).user_name
       this.defaultActive = this.$route.path.split('/')[1]
     },
     methods:{
