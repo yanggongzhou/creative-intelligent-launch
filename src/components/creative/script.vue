@@ -26,7 +26,6 @@
               <div style="padding: 10px;">
                 <span>脚本{{item}}</span>
                 <div class="bottom clearfix">
-                  <time class="time">{{ currentDate }}</time>
                   <el-button type="text" class="button">操作按钮</el-button>
                 </div>
               </div>

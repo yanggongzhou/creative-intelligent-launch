@@ -92,13 +92,19 @@ html,body{
   height: 100%;
 }
 .w100{
-  width: 100%;
+  width: 100%!important;
+}
+.w50{
+  width: 50%!important;
 }
 .mb10{
   margin-bottom: 10px;
 }
 .mt10{
   margin-top: 10px;
+}
+.mtb10{
+  margin: 10px 0;
 }
 
 
