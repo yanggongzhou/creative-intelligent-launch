@@ -3,7 +3,8 @@
     <el-button @click="backto" type="primary" plain> << 返回上一页 </el-button>
     <div class="contentBox">
       <div class="bigTitle">选择创意脚本</div>
-      <my-script></my-script>
+      <my-script @scriptForm="getScriptForm"></my-script>
+
       <div class="material">
         <div class="bigTitle">创意素材</div>
         <div class="material-card">
@@ -27,16 +28,17 @@
                     <span class="vintage">素材区:</span>
                     <div class="scriptCard mtb10">
                       <el-row :gutter="10">
-                        <el-col class="mt10" :span="8" v-for="item in 8" :key="item">
+                        <el-col class="mt10" :span="8" v-for="(item,index) in scriptForm.images" :key="index+'scr'">
                           <el-card class="card-item" :body-style="{ padding: '0px' }">
                             <div class="bgImage" @click.stop="materialSelect(item)">
-                              <div class="bgImage_spine">点击更换图片<br>16:{{item}}</div>
+                              <img style="width: 100%;height: 100%;" class="image" :src="item.image_url" alt="">
+                              <div class="bgImage_spine">点击更换图片<br>{{item.size}}</div>
                             </div>
                             <!--                        <div class="red-bl">16:{{item}}</div>-->
                             <!--                        <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">-->
 
                             <div style="padding: 10px;font-size: 13px;text-align: center">
-                              <span>素材{{item}}</span>
+                              <span>素材{{index+1}}</span>
                             </div>
                           </el-card>
                         </el-col>
@@ -125,10 +127,10 @@
     },
     data(){
       return{
+        scriptForm:'',
 
 
-
-        editableTabsValue:'2',
+        editableTabsValue:'1',
         tabList:[
           {
             title:'创意1',
@@ -167,6 +169,9 @@
       }
     },
     created() {
+
+
+
       if(Object.keys(this.$route.params).length){
         this.ruleForm.job_id = this.$route.params.id
         this.ruleForm.name = this.$route.params.name
@@ -178,6 +183,11 @@
       }
     },
     methods:{
+      //脚本组件传值
+      getScriptForm(val){
+        this.scriptForm = val;
+      },
+
       //创意移除
       removeTab(val){
 
@@ -237,11 +247,15 @@
             .card-item {
               position: relative;
               .bgImage{
+                position: relative;
                 width: 100%;
                 height: 140px;
-                background: url("https://images.magicscorp.com/Mimg/bms/parallax.jpg") no-repeat;
-                background-size:cover ;
+                /*background: url("https://images.magicscorp.com/Mimg/bms/parallax.jpg") no-repeat;*/
+                /*background-size:cover ;*/
                 .bgImage_spine{
+                  position: absolute;
+                  z-index: 11;
+                  top: 0;
                   text-align: center;
                   width: 100%;
                   height: 100%;

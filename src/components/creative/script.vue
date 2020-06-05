@@ -2,7 +2,7 @@
   <div>
     <div class="chooseScript">
       <el-button @click="scriptChange" type="primary">选择创意脚本 </el-button>
-      <span class="span_tip">当前:</span><el-tag type="success">999皮炎平</el-tag>
+      <span class="span_tip">当前脚本:</span><el-tag type="success">{{scriptForm.name}}</el-tag>
     </div>
 
 
@@ -18,16 +18,14 @@
       </div>
       <div class="scriptCard">
         <el-row :gutter="10">
-          <el-col class="mt10" :span="6" v-for="item in 8" :key="item">
+          <el-col class="mt10" :span="6" v-for="(item,index) in scriptList" :key="index+'script'">
             <el-card class="card-item" :body-style="{ padding: '0px' }">
-              <div class="red-bl">16:{{item}}</div>
+              <div class="red-bl">{{item.size}}</div>
               <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">
 
-              <div style="padding: 10px;">
-                <span>脚本{{item}}</span>
-                <div class="bottom clearfix">
-                  <el-button type="text" class="button">操作按钮</el-button>
-                </div>
+              <div class="card_foot">
+                <el-radio v-model="radioChooseVal" :label="item">{{item.name}}</el-radio>
+                <div class="time">{{item.created_at}}</div>
               </div>
             </el-card>
           </el-col>
@@ -38,34 +36,51 @@
 
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="scriptConfrim">确 定</el-button>
       </span>
     </el-dialog>
   </div>
 
 </template>
 <script>
+  import {requestServices} from "../../api/api";
+
   export default {
     data(){
       return{
         dialogVisible: false,
-        scriptList:[
-          {},{},{},{},{},{},{}
-        ]
+        scriptList:[],
+        radioChooseVal:'',
+
+        scriptForm:''
       }
     },
+    created() {
+      this.getScript()
+    },
     methods:{
+      getScript(){
+        requestServices.scriptList({
+          user_id:JSON.parse(window.sessionStorage.getItem("user_profile")).id,
+        })
+        .then(res=>{
+          this.scriptList = res.result.script
+        })
+      },
+
       //选择脚本
       scriptChange(){
         this.dialogVisible = true;
       },
-
-      handleClose(done) {
-        this.$confirm('确认关闭？')
-          .then(_ => {
-            done();
-          })
-          .catch(_ => {});
+      //弹框确认
+      scriptConfrim(){
+        if(!this.radioChooseVal){
+          this.$message.error('请选择创意脚本')
+        }else{
+          this.dialogVisible = false;
+          this.scriptForm= this.radioChooseVal
+          this.$emit('scriptForm',this.radioChooseVal)
+        }
       }
     }
   }
@@ -106,10 +121,10 @@
       position: relative;
       .red-bl{
         display: inline-block;
-        width: 80px;
+        width: 100px;
         height: 16px;
         position: absolute;
-        top: 5px;
+        top: 17px;
         background: red;
         right: -23px;
         transform: rotateZ(45deg);
@@ -119,6 +134,17 @@
       }
       .image{
         width: 100%;
+      }
+      .card_foot{
+        padding: 10px;
+        .name{
+          font-size: 14px;
+        }
+        .time{
+          font-size: 12px;
+          color: #546179;
+          text-align: right;
+        }
       }
     }
 

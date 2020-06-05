@@ -53,7 +53,7 @@
 <script>
   import { MouseParallax } from './index';
   import {requestServices} from "../api/api";
-
+  import {auth} from '../api/auth'
   export default {
     components: {
       MouseParallax,
@@ -85,9 +85,9 @@
               .then(res=>{
                 if(res.return_code===1000){
                   window.sessionStorage.setItem('user_profile',JSON.stringify(res.result.user_profile))
-                  this.$router.push({name:"job"})
+                  this.$router.push({name:"creative-list"})
                   this.$message.success(res.result.message)
-
+                  auth.setCookie('user_profile',res.result.user_profile,30)
                 }else {
                   this.$message.error("登陆失败，系统异常")
                 }

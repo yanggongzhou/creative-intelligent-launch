@@ -42,13 +42,13 @@
       </el-table-column>
 
       <el-table-column
-        prop="name"
+        prop="id"
         align="center"
         label="组ID"
         width="200">
       </el-table-column>
       <el-table-column
-        prop="experience"
+        prop="name"
         align="center"
         label="创意组名称">
       </el-table-column>
@@ -94,7 +94,7 @@
 </template>
 <script>
   import {requestServices} from "../../api/api";
-
+  import {auth} from "../../api/auth"
   export default {
     data() {
       return {
@@ -112,18 +112,20 @@
     created() {
       // this.user_id = JSON.parse(window.sessionStorage.getItem("user_profile")).id;
       this.getList();
+      console.log(auth.getCookie("user_profile"))
     },
 
     methods: {
 
       getList(){
         this.loading = true
-        requestServices.jobsList({
+        requestServices.zuList({
+          user_id:JSON.parse(window.sessionStorage.getItem("user_profile")).id,
           page_start:this.currentPage,
           page_count:this.pageSize
         }).then(res=>{
           if(res.return_code===1000){
-            this.tableData = res.result.jobs;
+            this.tableData = res.result.images;
             this.$forceUpdate();
             this.total = res.result.count;
           }else{

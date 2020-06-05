@@ -4,18 +4,16 @@ import qs from 'qs'//转换formdata类型数据
 import {MessageBox,Message } from 'element-ui';//提示框
 
 const instance = axios.create({
-  baseURL:"https://adserver-dev.magics-ad.com/magics_website/client/"
+  baseURL:"https://adserver-dev.magics-ad.com/"
 });
+
+// https://adserver-dev.magics-ad.com/admin_server/login/login
+
 // https://adserver-dev.magics-ad.com
 //"https://adserver.magics-ad.com/magics_server/client/"
 //"http://localhost:8080/"  //本地调试
 
-const prevHandler = ({data}) => {
-  // switch (data.status) {
-  //
-  // }
-  return data
-};
+
 //错误弹出框
 function errorMess(){
   MessageBox.confirm( '系统异常','提示', {
@@ -29,11 +27,17 @@ function errorMess(){
   }).then(() => {
   });
 }
+const prevHandler = ({data}) => {
+  // if (data.return_code!==1000) {
+  //   Message.error("系统异常！")
+  // }
+  return data
+};
+
 
 const prevErrHandler = ({response}) => {
   switch (response.status) {
     case 404:
-      // router.push({name:'error',query:{status:404}});
       break;
     case 401:
       location.reload();
@@ -59,9 +63,38 @@ instance.interceptors.request.use(
     return Promise.reject(err);
   });
 export const requestServices={
-  // 获取新闻列表
-  newsList(params){
-    return instance.get(`fetch_news`,{params:params}).then((res) =>res)
+
+  // admin_name
+  // password
+
+  loginIn(params){
+    return instance.get(`admin_server/login/login`,{params:params}).then((res) =>res)
+  },
+
+
+  //获取创意组
+  zuList(params){
+    return instance.post(`animation_server/client/get_animation_images`,params).then((res) =>res)
+  },
+
+
+  // addNews(params){
+  //   return instance.post(`magics_website/client/add_news`,params).then((res) =>res)
+  // },
+  // updateNews(params){
+  //   return instance.post(`magics_website/client/update_news`,params).then((res) =>res)
+  // },
+  // delNews(params){
+  //   return instance.post(`magics_website/client/delete_news`,params).then((res) =>res)
+  // },
+
+  //获取脚本列表
+  scriptList(params){
+    return instance.post(`animation_server/client/get_animation_scripts`,params).then((res) =>res)
+  },
+  //获取素材列表
+  imageList(params){
+    return instance.post(`animation_server/client/get_animation_images`,params).then((res) =>res)
   },
 
   //获取职位列表
@@ -71,7 +104,26 @@ export const requestServices={
 // }
   //获取职位列表
   jobsList(params){
-    return instance.get(`fetch_jobs`,{params:params}).then((res) =>res)
+    return instance.get(`magics_website/client/fetch_jobs`,{params:params}).then((res) =>res)
+  },
+  addJobs(params){
+    return instance.post(`magics_website/client/add_job`,params).then((res) =>res)
+  },
+  updateJobs(params){
+    return instance.post(`magics_website/client/update_job`,params).then((res) =>res)
+  },
+  delJobs(params){
+    return instance.post(`magics_website/client/delete_job`,params).then((res) =>res)
+  },
+
+  //职位顺序
+
+  // "user_id": 5,                        // 用户 ID
+  // "token: "xxxhyysa3243243",           // 令牌
+  // "start_location: "xxxhyysa3243243",  // 起始位置
+  // "end_location": 30,                  // 结束位置
+  orderJobs(params){
+    return instance.post(`magics_website/client/order_job`,params).then((res) =>res)
   },
 
   //   预约咨询
@@ -81,10 +133,8 @@ export const requestServices={
 //   "phone": "13520000000",     // 手机号
 //   "email": "xxx@xxx",         // 邮箱，测试时使用，可不填
 // }
-  sendEmail(params){
-    return instance.post(`send_email`,params).then((res) =>res)
+
+  emailList(params){
+    return instance.get(`magics_website/client/get_appointments_consultations`,{params:params}).then((res) =>res)
   },
-
-
-
 };

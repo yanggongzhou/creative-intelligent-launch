@@ -111,6 +111,8 @@
 
 </template>
 <script>
+  import {requestServices} from "../../api/api";
+
   export default {
     data(){
       return{
@@ -126,7 +128,18 @@
 
       }
     },
+    created() {
+      this.getImageList();
+    },
     methods:{
+      getImageList(){
+        requestServices.imageList({
+
+        })
+        .then(res=>{
+          this.imageList = res.result.images
+        })
+      },
       //素材替换
       materialSelect(item){
         this.materialVisible = true;
