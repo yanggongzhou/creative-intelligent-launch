@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="btnBox">
-      <el-button type="success" size="small" icon="el-icon-plus" @click="addBtn">新建创意</el-button>
+      <el-button type="success" size="small" icon="el-icon-plus" @click="addBtn" plain>新建创意</el-button>
       <!--      <el-button type="danger" size="small">删除</el-button>-->
     </div>
     <!--    @row-contextmenu="rowContextmenu"-->
@@ -28,15 +28,17 @@
         <!--        </template>-->
       </el-table-column>
       <el-table-column
-        prop="responsibilities"
+        prop="switch"
         align="center"
         label="开关"
         width="100">
         <template slot-scope="scope">
           <el-switch
-            v-model="scope.row.responsibilities"
+            @change="switchChange(scope)"
+            :value="!scope.row.switch"
             active-color="#13ce66"
             inactive-color="#ff4949">
+
           </el-switch>
         </template>
       </el-table-column>
@@ -52,7 +54,14 @@
         align="center"
         label="创意组名称">
       </el-table-column>
-
+      <el-table-column
+        prop="created_at"
+        align="center"
+        label="创建时间">
+        <template slot-scope="scope">
+          <p>{{new Date(scope.row.created_at).toLocaleString()}}</p>
+        </template>
+      </el-table-column>
       <el-table-column
         fixed="right"
         align="center"
@@ -67,7 +76,7 @@
             icon="el-icon-info"
             iconColor="red"
             title="确定删除这一职位？"
-            @onConfirm="delBtn(scope.row.id)"
+            @onConfirm="delBtn(scope.row)"
           >
             <el-button
               slot="reference"
@@ -100,7 +109,7 @@
       return {
         user_id:"",
 
-        tableData: [{},{},{},{},{},{},{},{},{},],
+        tableData: [],
 
         currentPage:1,
         total:0,
@@ -110,6 +119,7 @@
       }
     },
     created() {
+      this.user_id = auth.getCookie('user_profile').id
       // this.user_id = JSON.parse(window.sessionStorage.getItem("user_profile")).id;
       this.getList();
       console.log(auth.getCookie("user_profile"))
@@ -120,12 +130,13 @@
       getList(){
         this.loading = true
         requestServices.zuList({
-          user_id:JSON.parse(window.sessionStorage.getItem("user_profile")).id,
-          page_start:this.currentPage,
-          page_count:this.pageSize
+          user_id:this.user_id,
+          // page_start:this.currentPage,
+          // page_count:this.pageSize
         }).then(res=>{
           if(res.return_code===1000){
-            this.tableData = res.result.images;
+            this.tableData = res.result.groups;
+
             this.$forceUpdate();
             this.total = res.result.count;
           }else{
@@ -141,14 +152,29 @@
       editBtn(row) {
         this.$router.push({
           name:"creative-edit",
-          params:row
+          query:{
+            group_id:row.id
+          }
         })
       },
+      switchChange(scope){
+        // this.tableData[scope.$index].switch ? this.tableData[scope.$index].switch=0 : this.tableData[scope.$index].switch=1;
+        requestServices.editZu({
+          user_id:this.user_id,
+          group_id:scope.row.id,
+          switch:this.tableData[scope.$index].switch?0:1
+        }).then(res=>{
+          this.getList()
+        })
+
+        console.log(this.tableData)
+      },
       //删除
-      delBtn(id){
-        requestServices.delJobs({
-          job_id:id,
-          user_id:this.user_id
+      delBtn(row){
+        requestServices.editZu({
+          user_id:this.user_id,
+          group_id:row.id,
+          status:1,
         })
           .then(res=>{
             if(res.return_code===1000){

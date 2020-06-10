@@ -36,6 +36,7 @@ const prevHandler = ({data}) => {
 
 
 const prevErrHandler = ({response}) => {
+  debugger
   switch (response.status) {
     case 404:
       break;
@@ -43,6 +44,7 @@ const prevErrHandler = ({response}) => {
       location.reload();
       break;
     case 500:
+      Message.error('系统异常')
       break;
     default:
   }
@@ -63,30 +65,17 @@ instance.interceptors.request.use(
     return Promise.reject(err);
   });
 export const requestServices={
-
-  // admin_name
-  // password
-
-  loginIn(params){
-    return instance.get(`admin_server/login/login`,{params:params}).then((res) =>res)
-  },
-
-
+  loginIn:(params)=>instance.get(`admin_server/login/login`,{params:params}),
   //获取创意组
-  zuList(params){
-    return instance.post(`animation_server/client/get_animation_images`,params).then((res) =>res)
-  },
+  zuList:(params)=>instance.post(`animation_server/client/get_animation_creatives_groups`,params),
+  //创意组详情
+  SingleZu:(params)=>instance.post(`animation_server/client/get_animation_creatives_group`,params),
 
+  //新增创意组
+  addZu:(params)=>instance.post(`animation_server/client/insert_animation_creatives_group`,params),
+  //修改创意组
+  editZu:(params)=>instance.post(`animation_server/client/edit_group_status`,params),
 
-  // addNews(params){
-  //   return instance.post(`magics_website/client/add_news`,params).then((res) =>res)
-  // },
-  // updateNews(params){
-  //   return instance.post(`magics_website/client/update_news`,params).then((res) =>res)
-  // },
-  // delNews(params){
-  //   return instance.post(`magics_website/client/delete_news`,params).then((res) =>res)
-  // },
 
   //获取脚本列表
   scriptList(params){
@@ -97,44 +86,4 @@ export const requestServices={
     return instance.post(`animation_server/client/get_animation_images`,params).then((res) =>res)
   },
 
-  //获取职位列表
-// {
-//   "page_start": 1,                           // 起始页
-//   "page_count": 5,                           // 每页条数
-// }
-  //获取职位列表
-  jobsList(params){
-    return instance.get(`magics_website/client/fetch_jobs`,{params:params}).then((res) =>res)
-  },
-  addJobs(params){
-    return instance.post(`magics_website/client/add_job`,params).then((res) =>res)
-  },
-  updateJobs(params){
-    return instance.post(`magics_website/client/update_job`,params).then((res) =>res)
-  },
-  delJobs(params){
-    return instance.post(`magics_website/client/delete_job`,params).then((res) =>res)
-  },
-
-  //职位顺序
-
-  // "user_id": 5,                        // 用户 ID
-  // "token: "xxxhyysa3243243",           // 令牌
-  // "start_location: "xxxhyysa3243243",  // 起始位置
-  // "end_location": 30,                  // 结束位置
-  orderJobs(params){
-    return instance.post(`magics_website/client/order_job`,params).then((res) =>res)
-  },
-
-  //   预约咨询
-// {
-//   "company": "appmagics",     // 企业名称
-//   "name": "张三",              // 姓名
-//   "phone": "13520000000",     // 手机号
-//   "email": "xxx@xxx",         // 邮箱，测试时使用，可不填
-// }
-
-  emailList(params){
-    return instance.get(`magics_website/client/get_appointments_consultations`,{params:params}).then((res) =>res)
-  },
 };

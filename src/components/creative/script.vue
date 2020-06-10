@@ -1,14 +1,13 @@
 <template>
-  <div>
+  <div class="scriptDiagBox">
     <div class="chooseScript">
       <el-button @click="scriptChange" type="primary">选择创意脚本 </el-button>
-      <span class="span_tip">当前脚本:</span><el-tag type="success">{{scriptForm.name}}</el-tag>
+      <span class="span_tip">当前脚本:</span><el-tag v-show="scriptName" type="success">{{scriptName}}</el-tag>
     </div>
-
 
     <el-dialog
       append-to-body
-      lock-scroll="true"
+      :lock-scroll="true"
       center
       :visible.sync="dialogVisible"
       width="900px"
@@ -46,17 +45,29 @@
   import {requestServices} from "../../api/api";
 
   export default {
+    props:{
+      script_id:Number
+    },
     data(){
       return{
         dialogVisible: false,
         scriptList:[],
         radioChooseVal:'',
 
-        scriptForm:''
+        scriptName:''
       }
     },
     created() {
       this.getScript()
+    },
+    watch:{
+      script_id(value){
+        this.scriptList.forEach(val=>{
+          if(val.id===value){
+            this.scriptName  =val.name;
+          }
+        })
+      }
     },
     methods:{
       getScript(){
@@ -65,6 +76,11 @@
         })
         .then(res=>{
           this.scriptList = res.result.script
+
+          if(!this.$route.query.group_id){
+            this.scriptName = this.scriptList[0].name
+            this.$emit('scriptForm',this.scriptList[0])
+          }
         })
       },
 
@@ -79,6 +95,7 @@
         }else{
           this.dialogVisible = false;
           this.scriptForm= this.radioChooseVal
+          this.scriptName = this.scriptList[0].name
           this.$emit('scriptForm',this.radioChooseVal)
         }
       }
@@ -86,6 +103,11 @@
   }
 </script>
 <style lang="less" scoped>
+  .scriptDiagBox{
+    padding: 8px;
+    border: 1px solid #7ab5e4;
+    border-radius: 5px;
+  }
   .chooseScript{
     .span_tip{
       margin:0 10px 0 20px;

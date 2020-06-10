@@ -1,7 +1,9 @@
 <template>
   <div class="h100">
-    <el-header class="headerBox clearfix" height="50px">
+    <el-header class="headerBox clearfix" height="58px">
+      <img class="float_left" style="height: 50px;margin: 4px 0 0 50px" src="static/magicLogo.png" alt="">
       <div class="header_company float_left">
+
         迈吉客科技
       </div>
       <div class="header_btn float_right">
@@ -53,27 +55,27 @@
     z-index: 112;
     width: 100%;
     min-width: 680px;
-    /*background: #5e2bb9;*/
-    background-color: #292961;
+    background-color: #260e50;
+    /*border-bottom: 2px solid #daddf7;*/
     text-align: right;
     font-size: 0;
-    box-shadow: 0px 1px 4px 0px #3F51B5;
+    /*box-shadow: 0px 1px 4px 0px #3F51B5;*/
     .header_company{
 
       display: inline-block;
-      padding-left: 50px;
+      padding-left: 20px;
       /* padding: 5px 10px 5px 20px; */
-      font-size: 18px;
-      color: white;
+      font-size: 22px;
+      color: #fff;
       /*color: #606266;*/
       font-weight: 500;
-      height: 50px;
-      line-height: 50px;
+      height: 58px;
+      line-height: 58px;
     }
     .header_btn{
       margin-right: 50px;
-      height: 50px;
-      line-height: 59px;
+      height: 58px;
+      line-height: 66px;
     }
   }
 

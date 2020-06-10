@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     append-to-body
-    lock-scroll="true"
+    :lock-scroll="true"
     center
     :visible.sync="materialVisible"
     width="900px"
@@ -15,7 +15,7 @@
       ref="zipUpload"
       :action="'https://adserver-dev.magics-ad.com/common_server/client/upload'"
       :data="{
-                user_id: cmp_user_id,
+                user_id: user_id,
                 target: 1,
                 type: 0
               }"
@@ -29,17 +29,16 @@
 
 
 
-    <el-tabs type="card">
-      <el-tab-pane label="全部素材">
+    <el-tabs type="card"  v-model="tabsValue">
+      <el-tab-pane label="2D素材" name="0">
         <div class="scriptCard">
           <el-row :gutter="10">
-            <el-col class="mt10" :span="6" v-for="item in 8" :key="item">
+            <el-col class="mt10" :span="6" v-for="(item,index) in imageList" :key="index+'png'">
               <el-card class="card-item" :body-style="{ padding: '0px' }">
-                <div class="red-bl">600:30{{item}}</div>
-                <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">
-
+                <div class="red-bl">{{item.size}}</div>
+                <img :src="item.image_url" class="image">
                 <div style="padding: 10px;">
-                  <el-radio v-model="radioChooseVal" :label="item">素材名称{{item}}</el-radio>
+                  <el-radio v-model="radioChooseVal" :label="item">{{item.name}}</el-radio>
                 </div>
               </el-card>
             </el-col>
@@ -47,40 +46,23 @@
 
         </div>
       </el-tab-pane>
-      <el-tab-pane label="图片素材">
-        <div class="scriptCard">
-          <el-row :gutter="10">
-            <el-col class="mt10" :span="6" v-for="item in 4" :key="item">
-              <el-card class="card-item" :body-style="{ padding: '0px' }">
-                <div class="red-bl">600:30{{item}}</div>
-                <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">
+<!--      <el-tab-pane label="动效素材" name="1">-->
+<!--        <div class="scriptCard">-->
+<!--          <el-row :gutter="10">-->
+<!--            <el-col class="mt10" :span="6" v-for="item in 2" :key="item">-->
+<!--              <el-card class="card-item" :body-style="{ padding: '0px' }">-->
+<!--                <div class="red-bl">600:30{{item}}</div>-->
+<!--                <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">-->
 
-                <div style="padding: 10px;">
-                  <el-radio v-model="radioChooseVal" :label="item">素材名称{{item}}</el-radio>
-                </div>
-              </el-card>
-            </el-col>
-          </el-row>
+<!--                <div style="padding: 10px;">-->
+<!--                  <el-radio v-model="radioChooseVal" :label="item">素材名称{{item}}</el-radio>-->
+<!--                </div>-->
+<!--              </el-card>-->
+<!--            </el-col>-->
+<!--          </el-row>-->
 
-        </div>
-      </el-tab-pane>
-      <el-tab-pane label="动效素材">
-        <div class="scriptCard">
-          <el-row :gutter="10">
-            <el-col class="mt10" :span="6" v-for="item in 2" :key="item">
-              <el-card class="card-item" :body-style="{ padding: '0px' }">
-                <div class="red-bl">600:30{{item}}</div>
-                <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">
-
-                <div style="padding: 10px;">
-                  <el-radio v-model="radioChooseVal" :label="item">素材名称{{item}}</el-radio>
-                </div>
-              </el-card>
-            </el-col>
-          </el-row>
-
-        </div>
-      </el-tab-pane>
+<!--        </div>-->
+<!--      </el-tab-pane>-->
       <el-tab-pane label="3D素材">
         <div class="scriptCard">
           <el-row :gutter="10">
@@ -105,23 +87,23 @@
 
     <span slot="footer" class="dialog-footer">
         <el-button @click="materialVisible = false">取 消</el-button>
-        <el-button type="primary" @click="materialVisible = false">确 定</el-button>
+        <el-button type="primary" @click="materialConfrim">确 定</el-button>
       </span>
   </el-dialog>
 
 </template>
 <script>
   import {requestServices} from "../../api/api";
-
+  import {auth} from '../../api/auth'
   export default {
     data(){
       return{
+        user_id:'',
+        tabsValue:'0',//当前选中标签
         radioMaterial: '图片素材',
         radioChooseVal:'',
         materialVisible: false,
-        scriptList:[
-          {},{},{},{},{},{},{}
-        ],
+        imageList:[],
 
         tempList:[],
 
@@ -129,70 +111,54 @@
       }
     },
     created() {
+      this.user_id = auth.getCookie('user_profile').id;
       this.getImageList();
     },
     methods:{
       getImageList(){
         requestServices.imageList({
-
+          user_id:auth.getCookie('user_profile').id,
+          type:2,
+          // format:parseInt(this.tabsValue)
         })
         .then(res=>{
           this.imageList = res.result.images
         })
       },
+
       //素材替换
       materialSelect(item){
+        this.radioChooseVal = '';
         this.materialVisible = true;
       },
-
+      //素材确认
+      materialConfrim(){
+        if(this.radioChooseVal){
+          this.materialVisible = false;
+          this.$emit('imageForm',this.radioChooseVal)
+        }
+      },
       //上传2D zip
       zipChange(file){
         const isLt20M = file.size / 1024 / 1024 < 20;
-        const isZip = file.raw.type==='application/zip';
-        if(!isZip) {
-          this.$message.error('只支持上传 ZIP 格式!');
+        const isPng = file.raw.type==='image/png';
+        const isJpg = file.raw.type==='image/jpeg';
+        if(!isPng&&!isJpg) {
+          this.$message.error('只支持上传 png/jpg 格式!');
           return false
         }
         if (!isLt20M) {
-          this.$message.error('底图大小不能超过 20MB!');
+          this.$message.error('图片素材大小不能超过 20MB!');
           return false;
         }
-        //2D zip包校验
-        var new_zip = new JsZip();
-        new_zip.loadAsync(file.raw)
-          .then((item)=>{
-            console.log('zipfile:',item.files)
-            let _atlas = false,_json = false, _png = false;
-
-            let fileObj = Object.values(item.files)
-            fileObj.forEach(val=>{
-              if(!val.dir){
-                //后缀名
-                let _hzm = val.name.substr(val.name.lastIndexOf('.')+1)
-                if(_hzm==='atlas'){
-                  _atlas = true
-                }else if(_hzm==='png'){
-                  _png = true
-                }else if(_hzm==='json'){
-                  _json = true
-                }
-              }
-            })
-            if(_atlas&&_json&&_png){
-              this.$refs.zipUpload.submit();
-            }else{
-              this.$message.error('请上传包含atlas、json及png的zip压缩文件')
-              return false
-            }
-          })
-
+        this.$refs.zipUpload.submit();
       },
 
       zipSuccess(res,file){
         if(res.return_code===1000) {
-          // this.template.template_url = res.result.upload_url;
+          this.getImageList()
         }else {
-          this.$message.error('模版上传失败，请重新上传!');
+          this.$message.error('图片素材上传失败，请重新上传!');
         }
       },
     }
@@ -226,12 +192,14 @@
       position: relative;
       .red-bl{
         display: inline-block;
-        width: 80px;
-        height: 16px;
+        width: 90px;
+        height: 20px;
+        line-height: 20px;
         position: absolute;
-        top: 14px;
+        top: 15px;
         background: #3F51B5;
-        right: -19px;
+        right: -21px;
+        -webkit-transform: rotateZ(45deg);
         transform: rotateZ(45deg);
         color: white;
         text-align: center;
@@ -239,6 +207,7 @@
       }
       .image{
         width: 100%;
+        height: 150px;
       }
     }
 
