@@ -71,13 +71,12 @@
           <el-button  @click="editBtn(scope.row)" icon="el-icon-edit" type="text" size="small">编辑</el-button>
 
           <el-popconfirm
-            confirmButtonText='好的'
-            cancelButtonText='不用了'
+            confirmButtonText='确定'
+            cancelButtonText='取消'
             icon="el-icon-info"
             iconColor="red"
-            title="确定删除这一职位？"
-            @onConfirm="delBtn(scope.row)"
-          >
+            title="确定删除这一组创意？"
+            @onConfirm="delBtn(scope.row)">
             <el-button
               slot="reference"
               icon="el-icon-delete"
@@ -88,17 +87,17 @@
       </el-table-column>
     </el-table>
 
-    <el-pagination
-      class="mt10"
-      style="text-align: end"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="currentPage"
-      :page-sizes="[10, 20, 30, 40]"
-      :page-size="pageSize"
-      layout="total, sizes, prev, pager, next"
-      :total="total">
-    </el-pagination>
+<!--    <el-pagination-->
+<!--      class="mt10"-->
+<!--      style="text-align: end"-->
+<!--      @size-change="handleSizeChange"-->
+<!--      @current-change="handleCurrentChange"-->
+<!--      :current-page="currentPage"-->
+<!--      :page-sizes="[10, 20, 30, 40]"-->
+<!--      :page-size="pageSize"-->
+<!--      layout="total, sizes, prev, pager, next"-->
+<!--      :total="total">-->
+<!--    </el-pagination>-->
   </div>
 </template>
 <script>
@@ -159,19 +158,17 @@
       },
       switchChange(scope){
         // this.tableData[scope.$index].switch ? this.tableData[scope.$index].switch=0 : this.tableData[scope.$index].switch=1;
-        requestServices.editZu({
+        requestServices.editStatus({
           user_id:this.user_id,
           group_id:scope.row.id,
           switch:this.tableData[scope.$index].switch?0:1
         }).then(res=>{
           this.getList()
         })
-
-        console.log(this.tableData)
       },
       //删除
       delBtn(row){
-        requestServices.editZu({
+        requestServices.editStatus({
           user_id:this.user_id,
           group_id:row.id,
           status:1,

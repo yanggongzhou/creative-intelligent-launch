@@ -35,10 +35,12 @@
           <el-row :gutter="10">
             <el-col class="mt10" :span="6" v-for="(item,index) in imageList" :key="index+'png'">
               <el-card class="card-item" :body-style="{ padding: '0px' }">
-                <div class="red-bl">{{item.size}}</div>
-                <img :src="item.image_url" class="image">
-                <div style="padding: 10px;">
-                  <el-radio v-model="radioChooseVal" :label="item">{{item.name}}</el-radio>
+                <div @click="selectCard(item)" style="cursor: pointer">
+                  <div class="red-bl">{{item.size}}</div>
+                  <img :src="item.image_url" class="image">
+                  <div style="padding: 10px;">
+                    <el-radio v-model="radioChooseVal" :label="item">{{item.name}}</el-radio>
+                  </div>
                 </div>
               </el-card>
             </el-col>
@@ -125,7 +127,10 @@
           this.imageList = res.result.images
         })
       },
-
+      //卡片选择图片
+      selectCard(item){
+        this.radioChooseVal = item;
+      },
       //素材替换
       materialSelect(item){
         this.radioChooseVal = '';
@@ -210,8 +215,6 @@
         height: 150px;
       }
     }
-
-
   }
 
 </style>

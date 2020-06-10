@@ -73,9 +73,13 @@ export const requestServices={
 
   //新增创意组
   addZu:(params)=>instance.post(`animation_server/client/insert_animation_creatives_group`,params),
+  //修改创意组状态or删除
+  editStatus:(params)=>instance.post(`animation_server/client/edit_group_status`,params),
   //修改创意组
-  editZu:(params)=>instance.post(`animation_server/client/edit_group_status`,params),
+  editZu:(params)=>instance.post(`animation_server/client/edit_animation_creatives_group`,params),
 
+  //获取地域
+  areaList:(params)=>instance.post(`common_server/client/province_opt`,params),
 
   //获取脚本列表
   scriptList(params){

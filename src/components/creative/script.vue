@@ -1,8 +1,9 @@
 <template>
   <div class="scriptDiagBox">
     <div class="chooseScript">
-      <el-button @click="scriptChange" type="primary">选择创意脚本 </el-button>
-      <span class="span_tip">当前脚本:</span><el-tag v-show="scriptName" type="success">{{scriptName}}</el-tag>
+      <el-button v-show="!scriptName" @click="scriptChange" type="primary" size="large">选择创意脚本 </el-button>
+      <span v-show="scriptName" class="span_tip">当前脚本:</span>
+      <el-tag style="cursor: pointer" v-show="scriptName" @click="scriptChange" type="success">{{scriptName}}</el-tag>
     </div>
 
     <el-dialog
@@ -19,13 +20,16 @@
         <el-row :gutter="10">
           <el-col class="mt10" :span="6" v-for="(item,index) in scriptList" :key="index+'script'">
             <el-card class="card-item" :body-style="{ padding: '0px' }">
-              <div class="red-bl">{{item.size}}</div>
-              <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">
+              <div  @click.stop="selectCard(item)" style="cursor: pointer">
+                <div class="red-bl">{{item.size}}</div>
+                <img :src="item.preview_url" class="image">
 
-              <div class="card_foot">
-                <el-radio v-model="radioChooseVal" :label="item">{{item.name}}</el-radio>
-                <div class="time">{{item.created_at}}</div>
+                <div class="card_foot">
+                  <el-radio v-model="radioChooseVal" :label="item">{{item.name}}</el-radio>
+                  <div class="time">{{item.created_at}}</div>
+                </div>
               </div>
+
             </el-card>
           </el-col>
         </el-row>
@@ -46,7 +50,8 @@
 
   export default {
     props:{
-      script_id:Number
+      script_id:Number,
+      creativeList:Array
     },
     data(){
       return{
@@ -57,18 +62,23 @@
         scriptName:''
       }
     },
+    watch:{
+      script_id(value){
+        if(this.scriptList.length){
+          this.scriptList.forEach(val=>{
+            if(val.id===value){
+              this.scriptName  = val.name;
+              this.radioChooseVal = val;
+              this.$emit('scriptForm',val)
+            }
+          })
+        }
+      }
+    },
     created() {
       this.getScript()
     },
-    watch:{
-      script_id(value){
-        this.scriptList.forEach(val=>{
-          if(val.id===value){
-            this.scriptName  =val.name;
-          }
-        })
-      }
-    },
+
     methods:{
       getScript(){
         requestServices.scriptList({
@@ -78,12 +88,22 @@
           this.scriptList = res.result.script
 
           if(!this.$route.query.group_id){
-            this.scriptName = this.scriptList[0].name
-            this.$emit('scriptForm',this.scriptList[0])
+            // this.scriptName = this.scriptList[0].name
+            // this.$emit('scriptForm',this.scriptList[0])
+          }else{
+            this.scriptList.forEach(val=>{
+              if(val.id===this.script_id){
+                this.scriptName  = val.name;
+                this.$emit('scriptForm',val)
+              }
+            })
           }
         })
       },
-
+      //卡片选择脚本
+      selectCard(item){
+        this.radioChooseVal = item;
+      },
       //选择脚本
       scriptChange(){
         this.dialogVisible = true;
@@ -93,10 +113,33 @@
         if(!this.radioChooseVal){
           this.$message.error('请选择创意脚本')
         }else{
+
+         if(this.creativeList.length &&this.radioChooseVal.id!==this.script_id){
+           this.$confirm('检测到更换创意脚本，创意内容将被清空！是否继续？', '确认信息', {
+             distinguishCancelAndClose: true,
+             confirmButtonText: '确定替换',
+             cancelButtonText: '放弃修改'
+           })
+             .then(() => {
+               this.scriptForm= this.radioChooseVal
+               this.scriptName = this.scriptList[0].name
+               this.$emit('scriptForm',this.radioChooseVal)
+               this.$emit('clearCreativeList')
+             })
+             .catch(action => {
+               this.$message({
+                 type: 'info',
+                 message:
+                    '放弃更换脚本文件'
+               })
+             });
+
+         }else{
+           this.scriptForm= this.radioChooseVal
+           this.scriptName = this.scriptList[0].name
+           this.$emit('scriptForm',this.radioChooseVal)
+         }
           this.dialogVisible = false;
-          this.scriptForm= this.radioChooseVal
-          this.scriptName = this.scriptList[0].name
-          this.$emit('scriptForm',this.radioChooseVal)
         }
       }
     }
@@ -104,13 +147,12 @@
 </script>
 <style lang="less" scoped>
   .scriptDiagBox{
-    padding: 8px;
-    border: 1px solid #7ab5e4;
-    border-radius: 5px;
+    padding: 15px;
+    background-color: #fff;
   }
   .chooseScript{
     .span_tip{
-      margin:0 10px 0 20px;
+      margin:0 10px 0 0;
       font-size: 13px;
       color: gray;
       font-weight: 500;
@@ -156,6 +198,7 @@
       }
       .image{
         width: 100%;
+        height: 140px;
       }
       .card_foot{
         padding: 10px;
@@ -170,6 +213,19 @@
       }
     }
 
+
+  }
+
+  .bigTitle{
+   padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom:.5px solid gainsboro;
+    font-size: 16px;
+    font-weight: 500;
+    color: transparent;
+    background-color: black;
+    text-shadow: rgba(255,255,255,0.5) 0 5px 6px, rgba(255,255,255,0.2) 1px 3px 3px;
+    -webkit-background-clip: text;
 
   }
 </style>

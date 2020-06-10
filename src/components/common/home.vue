@@ -50,12 +50,13 @@
 
 <style lang="less" scoped>
   .headerBox{
+    /*background: #F9F9F9;*/
     position: fixed;
     top: 0;
     z-index: 112;
     width: 100%;
     min-width: 680px;
-    background-color: #260e50;
+    background-color: #0A2140;
     /*border-bottom: 2px solid #daddf7;*/
     text-align: right;
     font-size: 0;
@@ -82,8 +83,8 @@
   .contentBox{
     /*padding: 15px;*/
     margin: 85px auto 0;
-    /*width: 1200px;*/
-    width: 90%;
+    width: 1200px;
+    /*width: 90%;*/
     border-radius: 5px;
     /*box-shadow: 0 0 8px 1px #acafb1;*/
   }
