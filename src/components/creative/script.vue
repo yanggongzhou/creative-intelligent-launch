@@ -56,7 +56,6 @@
     },
     data(){
       return{
-        user_id:'',
         dialogVisible: false,
         scriptList:[],
         radioChooseVal:'',
@@ -78,14 +77,13 @@
       }
     },
     created() {
-      this.getScript()
-      this.user_id = auth.getCookie("user_profile").id
+      this.getScript();
     },
 
     methods:{
       getScript(){
         requestServices.scriptList({
-          user_id:this.user_id,
+          user_id:auth.getCookie("user_profile").id
         })
         .then(res=>{
           this.scriptList = res.result.script

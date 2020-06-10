@@ -36,7 +36,6 @@ const prevHandler = ({data}) => {
 
 
 const prevErrHandler = ({response}) => {
-  debugger
   switch (response.status) {
     case 404:
       break;

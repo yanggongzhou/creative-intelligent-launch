@@ -84,7 +84,6 @@
             requestServices.loginIn(this.ruleForm)
               .then(res=>{
                 if(res.return_code===1000){
-                  window.sessionStorage.setItem('user_profile',JSON.stringify(res.result.user_profile))
                   this.$router.push({name:"creative-list"})
                   this.$message.success(res.result.message)
                   auth.setCookie('user_profile',res.result.user_profile,30)
