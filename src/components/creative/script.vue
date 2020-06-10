@@ -47,6 +47,7 @@
 </template>
 <script>
   import {requestServices} from "../../api/api";
+  import {auth} from "../../api/auth";
 
   export default {
     props:{
@@ -55,6 +56,7 @@
     },
     data(){
       return{
+        user_id:'',
         dialogVisible: false,
         scriptList:[],
         radioChooseVal:'',
@@ -77,12 +79,13 @@
     },
     created() {
       this.getScript()
+      this.user_id = auth.getCookie("user_profile").id
     },
 
     methods:{
       getScript(){
         requestServices.scriptList({
-          user_id:JSON.parse(window.sessionStorage.getItem("user_profile")).id,
+          user_id:this.user_id,
         })
         .then(res=>{
           this.scriptList = res.result.script

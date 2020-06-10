@@ -119,7 +119,7 @@
     methods:{
       getImageList(){
         requestServices.imageList({
-          user_id:auth.getCookie('user_profile').id,
+          user_id: this.user_id,
           type:2,
           // format:parseInt(this.tabsValue)
         })
