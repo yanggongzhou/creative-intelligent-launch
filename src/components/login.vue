@@ -27,15 +27,16 @@
             <el-input
               size="small"
               prefix-icon="el-icon-user-solid"
-              placeholder="name"
+              placeholder="账号"
               v-model="ruleForm.admin_name"></el-input>
           </el-form-item>
           <el-form-item label="" prop="password">
             <el-input
               size="small"
               prefix-icon="el-icon-orange"
-              placeholder="Password"
+              placeholder="密码"
               type="password"
+              show-password
               v-model="ruleForm.password"></el-input>
           </el-form-item>
 

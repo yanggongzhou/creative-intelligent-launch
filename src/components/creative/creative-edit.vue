@@ -159,6 +159,7 @@
   import script from "./script";
   import material from "./material";
   import {auth} from "../../api/auth";
+  import axios from 'axios'
   export default {
     components:{
       'my-script':script,
@@ -329,7 +330,7 @@
             area: "0",            // 地区；传ID；0-不限
             start_time: 8,      // 起始时间；0-24；以小时为单位
             end_time: 9,
-            config_url: "",
+            config_url: this.scriptForm.config_url,
             images: this.scriptForm.images,
 
             areaRadio:"0",//不限or地域选择
@@ -346,13 +347,51 @@
       },
       //素材确认
       getImageForm(item){
-        let replaceIndex ;
+        let replaceIndex;
         this.scriptForm.images.forEach((val,ind)=>{
           if(this.scriptFormImagesItem.id===val.id){
             replaceIndex = ind;
           }
         })
+        let scriptJson,
+          _name = item.image_url.split('.');
+        axios.get( this.scriptForm.config_url).then(res=>{
+          console.log(res)
+          scriptJson = res.data
+          scriptJson.param.forEach((value,index)=>{
+            if(this.scriptFormImagesItem.id===value.id){
+              scriptJson.param[index].id = item.id;
+              // scriptJson.params[index].name =item.name + _name[_name.length-1];
+              scriptJson.param[index].name = item.name;
+              this.saveJson(scriptJson)
+            }
+          })
+        })
+
+        //修改本创意显示的素材
         this.creativeList[parseInt(this.editableTabsValue)].images.splice(replaceIndex,1,item)
+      },
+
+      //上传json文件修改config_url;
+      saveJson(data) {
+        console.log(data);
+        var content = JSON.stringify(data);
+        var blob = new Blob([content], { type: "text/plain;charset=utf-8" }); // 把数据转化成blob对象
+        // console.log(blob, "blob");
+        let file = new File([blob], "config.json", { lastModified: Date.now() }); // blob转file
+        // console.log(file);
+
+        var fd = new FormData();
+        fd.append("file", file);
+        fd.append("user_id", this.user_id);
+        fd.append("target", 1);
+        fd.append("type", 0);
+
+        requestServices.uploadFile(fd)
+          .then(res=>{
+            console.log("config_url", res);
+            this.creativeList[parseInt(this.editableTabsValue)].config_url = "https://small.magics-ad.com/open/20200612/1c68f4497eaf6a908384e96b41ef0c5a80a62987.json"
+          })
       },
 
       submitForm(formName) {
@@ -376,7 +415,7 @@
               area:value.area,
               start_time:value.start_time,
               end_time:value.end_time,
-              config_url: "https://xxx",    // 配置文件链接
+              config_url: value.config_url,    // 配置文件链接
               images:_images
             })
           }else{
@@ -386,7 +425,7 @@
               area:'0',
               start_time:value.start_time,
               end_time:value.end_time,
-              config_url: "https://xxx",    // 配置文件链接
+              config_url: value.config_url,    // 配置文件链接
               images:_images
             })
           }
@@ -452,9 +491,7 @@
         }else{
           this.$router.push({name:"creative-list"})
         }
-
       }
-
     }
   }
 </script>

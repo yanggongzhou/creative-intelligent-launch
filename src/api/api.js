@@ -88,5 +88,11 @@ export const requestServices={
   imageList(params){
     return instance.post(`animation_server/client/get_animation_images`,params).then((res) =>res)
   },
-
+  //保存or上传脚本动画
+  uploadFile(params){
+    let _config = {
+      'Content-Type':"multipart/form-data"
+    }
+    return instance.post(`common_server/client/upload`,params,_config)
+  }
 };
