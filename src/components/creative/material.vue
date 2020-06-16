@@ -145,9 +145,11 @@
       },
       //上传2D zip
       zipChange(file){
+        console.log(file)
         const isLt20M = file.size / 1024 / 1024 < 20;
         const isPng = file.raw.type==='image/png';
         const isJpg = file.raw.type==='image/jpeg';
+        const isGif = file.raw.type==='image/gif';
         if(!isPng&&!isJpg) {
           this.$message.error('只支持上传 png/jpg 格式!');
           return false
