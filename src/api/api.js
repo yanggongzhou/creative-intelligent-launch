@@ -94,5 +94,9 @@ export const requestServices={
       'Content-Type':"multipart/form-data"
     }
     return instance.post(`common_server/client/upload`,params,_config)
+  },
+  //新增创意动画资源
+  imageAdd(params){
+    return instance.post(`animation_server/client/insert_animation_image`,params)
   }
 };

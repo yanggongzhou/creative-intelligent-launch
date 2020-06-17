@@ -22,8 +22,7 @@
       :file-list="tempList"
       :on-success="zipSuccess"
       :on-change="zipChange"
-      :auto-upload="false"
-    >
+      :auto-upload="false">
       <el-button  type='primary' size="small">上传素材</el-button>
     </el-upload>
 
@@ -45,7 +44,9 @@
               </el-card>
             </el-col>
           </el-row>
-
+          <div style="height: 100px;text-align: center" v-show="imageList.length===0">
+            暂无数据
+          </div>
         </div>
       </el-tab-pane>
 <!--      <el-tab-pane label="动效素材" name="1">-->
@@ -68,18 +69,20 @@
       <el-tab-pane label="3D素材">
         <div class="scriptCard">
           <el-row :gutter="10">
-            <el-col class="mt10" :span="6" v-for="item in 1" :key="item">
-              <el-card class="card-item" :body-style="{ padding: '0px' }">
-                <div class="red-bl">600:30{{item}}</div>
-                <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">
+<!--            <el-col class="mt10" :span="6" v-for="item in 1" :key="item">-->
+<!--              <el-card class="card-item" :body-style="{ padding: '0px' }">-->
+<!--                <div class="red-bl">600:30{{item}}</div>-->
+<!--                <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">-->
 
-                <div style="padding: 10px;">
-                  <el-radio v-model="radioChooseVal" :label="item">素材名称{{item}}</el-radio>
-                </div>
-              </el-card>
-            </el-col>
+<!--                <div style="padding: 10px;">-->
+<!--                  <el-radio v-model="radioChooseVal" :label="item">素材名称{{item}}</el-radio>-->
+<!--                </div>-->
+<!--              </el-card>-->
+<!--            </el-col>-->
           </el-row>
-
+          <div style="height: 100px;text-align: center">
+            暂无数据
+          </div>
         </div>
       </el-tab-pane>
     </el-tabs>
@@ -88,7 +91,7 @@
 
 
     <span slot="footer" class="dialog-footer">
-        <el-button @click="materialVisible = false">取 消</el-button>
+        <el-button @click="materialVisible = false">关 闭</el-button>
         <el-button type="primary" @click="materialConfrim">确 定</el-button>
       </span>
   </el-dialog>
@@ -108,8 +111,7 @@
         imageList:[],
 
         tempList:[],
-
-
+        materialSize:'',
       }
     },
     created() {
@@ -121,6 +123,7 @@
         requestServices.imageList({
           user_id: this.user_id,
           type:2,
+          is_all:1, //is_all：是否需要公共数据；0-需要；1-不需要
           // format:parseInt(this.tabsValue)
         })
         .then(res=>{
@@ -145,7 +148,6 @@
       },
       //上传2D zip
       zipChange(file){
-        console.log(file)
         const isLt20M = file.size / 1024 / 1024 < 20;
         const isPng = file.raw.type==='image/png';
         const isJpg = file.raw.type==='image/jpeg';
@@ -158,15 +160,54 @@
           this.$message.error('图片素材大小不能超过 20MB!');
           return false;
         }
-        this.$refs.zipUpload.submit();
+        this.zipSize(file.raw).then(data=>{
+          this.materialSize = data;
+          this.$refs.zipUpload.submit();
+        });
       },
 
       zipSuccess(res,file){
         if(res.return_code===1000) {
-          this.getImageList()
+          this.addImage(res.result.upload_url)
         }else {
-          this.$message.error('图片素材上传失败，请重新上传!');
+          this.$message.error('素材上传失败，请重新上传!');
         }
+      },
+
+      zipSize(file) {
+        return new Promise((resolve, reject) => {
+          let reader = new FileReader();
+          reader.readAsDataURL(file); // 必须用file.raw
+          reader.onload = () => { // 让页面中的img标签的src指向读取的路径
+            let img = new Image();
+            img.src = reader.result;
+            if (img.complete) { // 如果存在浏览器缓存中
+              resolve(img.width+':'+img.height)
+            } else {
+              img.onload = () => {
+                resolve(img.width+':'+img.height)
+              }
+            }
+          };
+        })
+      },
+
+
+      addImage(materialUrl){
+        requestServices.imageAdd({
+          user_id:this.user_id,
+          type:2,//0-未知；1-背景；2-2D；3-3D；4-粒子（默认2，一期只有2）
+          format:0,//0-图片；1-动效素材 (默认0)
+          size:this.materialSize,
+          image_url:materialUrl
+        }).then((res)=>{
+          if(res.return_code===1000) {
+            this.getImageList();
+            this.$message.success('素材上传成功!');
+          }else {
+            this.$message.error('素材上传失败，请重新上传!');
+          }
+        })
       },
     }
   }

@@ -13,6 +13,7 @@
                    v-if="creativeList.length"
                    v-model="editableTabsValue"
                    closable
+                   @tab-click="foucsTab"
                    @tab-remove="removeTab"
                    @tab-add="addTab" editable>
             <el-tab-pane
@@ -39,7 +40,7 @@
                       <el-row :gutter="10">
                         <el-col class="mt10" :span="8" v-for="(item,index) in val.images" :key="index+'scr'">
                           <el-card class="card-item" :body-style="{ padding: '0px' }">
-                            <div class="bgImage" @click.stop="materialSelect(item)">
+                            <div class="bgImage" @click.stop="materialSelect(item,index)">
                               <img style="width: 100%;height: 100%;" class="image" :src="item.image_url" alt="">
                               <div class="bgImage_spine">点击更换图片<br>{{item.size}}</div>
                             </div>
@@ -64,15 +65,20 @@
 
 
                       <div class="directional mtb10">
-                        <el-form-item label="性别" prop="sex">
+                        <el-form-item label="性别" prop="gender">
                           <el-select v-model="val.gender" placeholder="请选择" class="w50">
                             <el-option label="不限" value="0"></el-option>
                             <el-option label="男" value="1"></el-option>
                             <el-option label="女" value="2"></el-option>
                           </el-select>
                         </el-form-item>
-                        <el-form-item label="地域" prop="area">
-                          <el-radio-group v-model="val.areaRadio">
+                        <el-form-item label="地域" prop="areaRadio">
+<!--                          <el-select v-model="val.areaRadio" placeholder="请选择" class="w50">-->
+<!--                            <el-option label="不限" value="0"></el-option>-->
+<!--                            <el-option label="选择城市" value="1"></el-option>-->
+<!--                          </el-select>-->
+
+                          <el-radio-group @change="rad=>radioChange(rad,ind)" v-model="ruleForm.areaRadio">
                             <el-radio label="0">不限</el-radio>
                             <el-radio label="1">选择城市</el-radio>
                           </el-radio-group>
@@ -183,6 +189,7 @@
 
         scriptForm:'',//脚本对应的素材
         scriptFormImagesItem:'', //当前选中要替换的素材
+        scriptFormImagesIndex:'',//当前选中要替换的素材的索引
 
         editableTabsValue:'0',//当前创意标签
 
@@ -194,7 +201,7 @@
 
         areaData:[],//地域数据
         ruleForm: {
-
+          areaRadio:'0'
         },
         rules: {
           creative_name:[
@@ -218,7 +225,7 @@
           label:i+':00'
         })
       }
-      for(let j=1;j<24;j++){
+      for(let j=1;j<=24;j++){
         this.endOptions.push({
           value:j,
           label:j+':00'
@@ -230,9 +237,17 @@
       }else{
         this.getAreaData(false);
       }
-
     },
     methods:{
+      foucsTab(val){
+        this.ruleForm.areaRadio = this.creativeList[parseInt(val.name)].areaRadio
+      },
+      radioChange(rad,ind){
+        this.creativeList[ind].areaRadio = rad;
+        this.$forceUpdate()
+      },
+
+
       getSingleZu(){
         requestServices.SingleZu({
           user_id:this.user_id,
@@ -243,27 +258,30 @@
           this.group_name = res.result.groups.name
           this.landing_page_url = res.result.groups.landing_page_url
           this.creativeList.forEach((val,ind)=>{
-            val.tabId = ind+'';
+            this.creativeList[ind].tabId = ind+'';
             if(val.area==="0"){
-              val.areaRadio = "0";
-              val.cascaderArea=[];
+              this.creativeList[ind].areaRadio="0";
+              this.creativeList[ind].cascaderArea=[];
             }else{
-              val.cascaderArea=[];
+              this.creativeList[ind].cascaderArea=[];
               val.area.split(',').forEach(value=>{
                 this.areaData.forEach(i=>{
                   i.children.forEach(j=>{
                     if(parseInt(value)===j.id){
-                      val.cascaderArea.push([i.id,j.id])
+                      this.creativeList[ind].cascaderArea.push([i.id,j.id])
                     }
                   })
                 })
 
               })
-              console.log(val.area,val.cascaderArea, this.areaData)
-              val.areaRadio = "1";
+              this.creativeList[ind].areaRadio = "1";
+              // console.log(this.creativeList)
             }
           })
+        }).then(()=>{
+          this.ruleForm.areaRadio = this.creativeList[0].areaRadio;
         })
+
       },
 
 
@@ -314,8 +332,7 @@
         if(this.editableTabsValue === (this.creativeList.length-1+'')){
           this.editableTabsValue =this.creativeList.length-2+''
         }
-
-        this.creativeList.splice((parseInt(val)-1),1)
+        this.creativeList.splice(parseInt(val),1)
         this.creativeList.forEach((j,i)=>{
           j.tabId = i+''
           // j.name = '创意'+j.tabId
@@ -341,35 +358,23 @@
         this.editableTabsValue = this.creativeList.length-1+''
       },
       //素材替换
-      materialSelect(item){
+      materialSelect(item,index){
         this.scriptFormImagesItem = item;
+        this.scriptFormImagesIndex = index;
         this.$refs.myMaterial.materialSelect()
       },
       //素材确认
       getImageForm(item){
-        let replaceIndex;
-        this.scriptForm.images.forEach((val,ind)=>{
-          if(this.scriptFormImagesItem.id===val.id){
-            replaceIndex = ind;
-          }
-        })
-        let scriptJson,
-          _name = item.image_url.split('.');
+        let scriptJson;
         axios.get( this.scriptForm.config_url).then(res=>{
-          console.log(res)
           scriptJson = res.data
-          scriptJson.param.forEach((value,index)=>{
-            if(this.scriptFormImagesItem.id===value.id){
-              scriptJson.param[index].id = item.id;
-              // scriptJson.params[index].name =item.name + _name[_name.length-1];
-              scriptJson.param[index].name = item.name;
-              this.saveJson(scriptJson)
-            }
-          })
+          scriptJson.param[this.scriptFormImagesIndex].id=item.id
+          scriptJson.param[this.scriptFormImagesIndex].name = item.name;
+          this.saveJson(scriptJson);
         })
 
         //修改本创意显示的素材
-        this.creativeList[parseInt(this.editableTabsValue)].images.splice(replaceIndex,1,item)
+        this.creativeList[parseInt(this.editableTabsValue)].images.splice(this.scriptFormImagesIndex,1,item)
       },
 
       //上传json文件修改config_url;
@@ -588,8 +593,7 @@
     }
   }
   .vintage {
-    color: transparent;
-    -webkit-text-stroke: 1px black;
+   color: #333;
     letter-spacing: 0.04em;
     font-size: 16px;
     font-weight: 600;
