@@ -51,15 +51,14 @@
 
   export default {
     props:{
+      creativeList:Array,
       script_id:Number,
-      creativeList:Array
     },
     data(){
       return{
         dialogVisible: false,
         scriptList:[],
         radioChooseVal:'',
-
         scriptName:''
       }
     },
@@ -123,7 +122,6 @@
            })
              .then(() => {
                this.scriptForm= this.radioChooseVal
-               this.scriptName = this.scriptList[0].name
                this.$emit('scriptForm',this.radioChooseVal)
                this.$emit('clearCreativeList')
              })
@@ -137,7 +135,6 @@
 
          }else{
            this.scriptForm= this.radioChooseVal
-           this.scriptName = this.scriptList[0].name
            this.$emit('scriptForm',this.radioChooseVal)
          }
           this.dialogVisible = false;

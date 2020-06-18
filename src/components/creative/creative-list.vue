@@ -47,16 +47,18 @@
         prop="id"
         align="center"
         label="组ID"
-        width="200">
+        width="80">
       </el-table-column>
       <el-table-column
         prop="name"
         align="center"
+        min-width="120"
         label="创意组名称">
       </el-table-column>
       <el-table-column
         prop="created_at"
         align="center"
+        min-width="160"
         label="创建时间">
         <template slot-scope="scope">
           <p>{{new Date(scope.row.created_at).toLocaleString()}}</p>

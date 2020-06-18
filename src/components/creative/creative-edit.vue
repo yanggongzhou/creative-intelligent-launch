@@ -1,6 +1,9 @@
 <template>
   <div>
-    <el-button @click="backto" type="text" size="large"> << 返回上一页 </el-button>
+    <div>
+      <el-button @click="backto" type="text" size="large"> << 返回上一页 </el-button>
+    </div>
+
     <div class="contentBox">
       <div class="bigTitle">选择创意脚本</div>
       <my-script @scriptForm="getScriptForm" @clearCreativeList="clearCreativeList" :creativeList="creativeList" :script_id="script_id"></my-script>
@@ -326,6 +329,7 @@
       getScriptForm(val){
         this.scriptForm = val;
         this.script_id = val.id
+        console.log('this.script_id',this.script_id)
       },
       //创意移除
       removeTab(val){
@@ -339,6 +343,7 @@
         })
       },
       addTab(){
+        console.log(this.scriptForm.images)
         this.creativeList.push(
           {
             name:'',
@@ -348,7 +353,7 @@
             start_time: 8,      // 起始时间；0-24；以小时为单位
             end_time: 9,
             config_url: this.scriptForm.config_url,
-            images: this.scriptForm.images,
+            images: JSON.parse(JSON.stringify(this.scriptForm.images)),
 
             areaRadio:"0",//不限or地域选择
             cascaderArea:[],//地域绑定值
@@ -366,7 +371,7 @@
       //素材确认
       getImageForm(item){
         let scriptJson;
-        axios.get( this.scriptForm.config_url).then(res=>{
+        axios.get(this.creativeList[parseInt(this.editableTabsValue)].config_url).then(res=>{
           scriptJson = res.data
           scriptJson.param[this.scriptFormImagesIndex].id=item.id
           scriptJson.param[this.scriptFormImagesIndex].name = item.name;
@@ -379,7 +384,6 @@
 
       //上传json文件修改config_url;
       saveJson(data) {
-        console.log(data);
         var content = JSON.stringify(data);
         var blob = new Blob([content], { type: "text/plain;charset=utf-8" }); // 把数据转化成blob对象
         // console.log(blob, "blob");
@@ -394,8 +398,7 @@
 
         requestServices.uploadFile(fd)
           .then(res=>{
-            console.log("config_url", res);
-            this.creativeList[parseInt(this.editableTabsValue)].config_url = "https://small.magics-ad.com/open/20200612/1c68f4497eaf6a908384e96b41ef0c5a80a62987.json"
+            this.creativeList[parseInt(this.editableTabsValue)].config_url = res.result.upload_url;
           })
       },
 
@@ -518,8 +521,11 @@
           min-width: 950px;
           .scriptCard {
             max-height: 390px;
-            /*overflow-y: scroll;*/
-            /*overflow-x: hidden;*/
+            min-height: 200px;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            padding: 10px;
+            border: 1px solid gainsboro;
             width: 600px;
             .card-item {
               position: relative;

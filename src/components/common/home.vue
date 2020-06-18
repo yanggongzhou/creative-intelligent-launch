@@ -83,7 +83,8 @@
   .contentBox{
     /*padding: 15px;*/
     margin: 85px auto 0;
-    width: 1200px;
+    max-width: 1200px;
+    min-width: 600px;
     /*width: 90%;*/
     border-radius: 5px;
     /*box-shadow: 0 0 8px 1px #acafb1;*/
