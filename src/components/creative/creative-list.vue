@@ -137,9 +137,9 @@
         }).then(res=>{
           if(res.return_code===1000){
             this.tableData = res.result.groups;
-
+            this.tableData.reverse()
             this.$forceUpdate();
-            this.total = res.result.count;
+            // this.total = res.result.count;
           }else{
             this.$message.error("系统异常!")
           }

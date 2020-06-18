@@ -91,12 +91,17 @@
             // this.scriptName = this.scriptList[0].name
             // this.$emit('scriptForm',this.scriptList[0])
           }else{
+            let ids=[];
             this.scriptList.forEach(val=>{
+              ids.push(val.id);
               if(val.id===this.script_id){
                 this.scriptName  = val.name;
                 this.$emit('scriptForm',val)
               }
             })
+            if(ids.indexOf(this.script_id)===-1){
+              // this.$message.warning('当前创意组对应的脚本信息不存在，将无法添加创意')
+            }
           }
         })
       },
@@ -170,7 +175,9 @@
   /deep/.el-dialog__headerbtn{
     top: 15px!important;
   }
-
+  /deep/.el-dialog--center .el-dialog__body{
+    padding: 25px 25px 0px;
+  }
 
   .diag-title{
     color: white;
@@ -179,12 +186,16 @@
     font-size: 16px;
   }
   .scriptCard{
+    height: 350px;
+    overflow-y: scroll;
+    overflow-x: hidden;
     .card-item{
       position: relative;
       .red-bl{
         display: inline-block;
         width: 100px;
-        height: 16px;
+        height: 20px;
+        line-height: 20px;
         position: absolute;
         top: 17px;
         background: red;

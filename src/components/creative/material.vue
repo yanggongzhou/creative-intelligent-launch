@@ -32,13 +32,13 @@
       <el-tab-pane label="2D素材" name="0">
         <div class="scriptCard">
           <el-row :gutter="10">
-            <el-col class="mt10" :span="6" v-for="(item,index) in imageList" :key="index+'png'">
+            <el-col class="mt10" :span="4" v-for="(item,index) in imageList" :key="index+'png'">
               <el-card class="card-item" :body-style="{ padding: '0px' }">
                 <div @click="selectCard(item)" style="cursor: pointer">
                   <div class="red-bl">{{item.size}}</div>
                   <img :src="item.image_url" class="image">
-                  <div style="padding: 10px;">
-                    <el-radio v-model="radioChooseVal" :label="item">{{item.name}}</el-radio>
+                  <div class="card_foot">
+                    <el-radio v-model="radioChooseVal" :label="item" class="foradio">{{item.name}}</el-radio>
                   </div>
                 </div>
               </el-card>
@@ -109,7 +109,6 @@
         radioChooseVal:'',
         materialVisible: false,
         imageList:[],
-
         tempList:[],
         materialSize:'',
       }
@@ -227,6 +226,9 @@
   /deep/.el-dialog__headerbtn{
     top: 15px!important;
   }
+  /deep/.el-dialog--center .el-dialog__body{
+    padding: 25px 25px 0px;
+  }
 
 
   .diag-title{
@@ -236,28 +238,38 @@
     font-size: 16px;
   }
   .scriptCard{
+    height: 350px;
+    overflow-y: scroll;
+    overflow-x: hidden;
     .card-item{
       position: relative;
+      font-size: 0;
       .red-bl{
         display: inline-block;
-        width: 90px;
-        height: 20px;
-        line-height: 20px;
+        width: auto;
         position: absolute;
-        top: 15px;
-        background: #3F51B5;
-        right: -21px;
-        -webkit-transform: rotateZ(45deg);
-        transform: rotateZ(45deg);
+        top: 5px;
+        background: #5c6ed0;
+        left: 5px;
         color: white;
         text-align: center;
-        font-size: 13px;
+        font-size: 12px;
+        border-radius: 4px;
+        padding: 2px 4px;
       }
       .image{
         width: 100%;
-        height: 150px;
+        height: 100px;
+      }
+    }
+    .card_foot{
+      padding: 5px;
+      .foradio{
+
       }
     }
   }
-
+/deep/.el-radio__label{
+  font-size: 12px!important;
+}
 </style>

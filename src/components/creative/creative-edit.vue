@@ -8,7 +8,7 @@
       <div class="bigTitle">选择创意脚本</div>
       <my-script @scriptForm="getScriptForm" @clearCreativeList="clearCreativeList" :creativeList="creativeList" :script_id="script_id"></my-script>
 
-      <div v-if="scriptForm" class="material">
+      <div  class="material">
         <div class="bigTitle">创意素材</div>
         <div class="material-card">
           <el-button class="addtab_btn"  v-if="!creativeList.length" type="primary" size="large" icon="el-icon-plus" @click="addTab">添加创意</el-button>
@@ -41,20 +41,23 @@
                     <span class="vintage">素材区:</span>
                     <div class="scriptCard mtb10">
                       <el-row :gutter="10">
-                        <el-col class="mt10" :span="8" v-for="(item,index) in val.images" :key="index+'scr'">
-                          <el-card class="card-item" :body-style="{ padding: '0px' }">
-                            <div class="bgImage" @click.stop="materialSelect(item,index)">
-                              <img style="width: 100%;height: 100%;" class="image" :src="item.image_url" alt="">
-                              <div class="bgImage_spine">点击更换图片<br>{{item.size}}</div>
-                            </div>
-                            <!--                        <div class="red-bl">16:{{item}}</div>-->
-                            <!--                        <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">-->
+                        <div v-for="(item,index) in val.images" :key="index+'scr'">
+                          <el-col class="mt10" :span="8" v-if="item.isReplaceable===1" >
+                            <el-card class="card-item" :body-style="{ padding: '0px' }">
+                              <div class="bgImage" @click.stop="materialSelect(item)">
+                                <img style="width: 100%;height: 100%;" class="image" :src="item.image_url" alt="">
+                                <div class="bgImage_spine">点击更换图片<br>{{item.size}}</div>
+                              </div>
+                              <!--                        <div class="red-bl">16:{{item}}</div>-->
+                              <!--                        <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">-->
 
-                            <div style="padding: 10px;font-size: 13px;text-align: center">
-                              <span>{{item.name}}</span>
-                            </div>
-                          </el-card>
-                        </el-col>
+                              <div style="padding: 10px;font-size: 13px;text-align: center">
+                                <span>{{item.name}}</span>
+                              </div>
+                            </el-card>
+                          </el-col>
+                        </div>
+
                       </el-row>
 
                     </div>
@@ -161,6 +164,7 @@
     </div>
 
     <my-material ref="myMaterial" @imageForm="getImageForm"></my-material>
+    <my-loading v-if="isLoading" :saveLoading="saveLoading"></my-loading>
   </div>
 </template>
 <script>
@@ -169,10 +173,12 @@
   import material from "./material";
   import {auth} from "../../api/auth";
   import axios from 'axios'
+  import loading from '../common/loading'
   export default {
     components:{
       'my-script':script,
-      'my-material':material
+      'my-material':material,
+      'my-loading':loading
     },
     data(){
       var self = this;
@@ -186,6 +192,7 @@
       };
       return{
         isLoading:false,
+        saveLoading:false,
         user_id:'',
         startOptions:[],//开始时间选项
         endOptions:[],//结束时间选项
@@ -236,10 +243,20 @@
       }
       //修改创意组数据时
       if(this.$route.query.group_id){
+        this.isLoading=true;
+        this.saveLoading=false;
         this.getAreaData(true);
       }else{
         this.getAreaData(false);
       }
+    },
+    mounted() {
+      window.onbeforeunload = function () {
+        return "退出?";
+      };
+    },
+    beforeDestroy() {
+      window.onbeforeunload=null;
     },
     methods:{
       foucsTab(val){
@@ -250,7 +267,7 @@
         this.$forceUpdate()
       },
 
-
+      //获取创意组详情
       getSingleZu(){
         requestServices.SingleZu({
           user_id:this.user_id,
@@ -282,6 +299,7 @@
             }
           })
         }).then(()=>{
+          this.isLoading=false;
           this.ruleForm.areaRadio = this.creativeList[0].areaRadio;
         })
 
@@ -343,6 +361,10 @@
         })
       },
       addTab(){
+        if(!this.scriptForm){
+          this.$message.info('请先选择创意脚本');
+          return false
+        }
         console.log(this.scriptForm.images)
         this.creativeList.push(
           {
@@ -363,9 +385,9 @@
         this.editableTabsValue = this.creativeList.length-1+''
       },
       //素材替换
-      materialSelect(item,index){
+      materialSelect(item){
         this.scriptFormImagesItem = item;
-        this.scriptFormImagesIndex = index;
+        this.scriptFormImagesIndex = item.index;
         this.$refs.myMaterial.materialSelect()
       },
       //素材确认
@@ -379,7 +401,12 @@
         })
 
         //修改本创意显示的素材
-        this.creativeList[parseInt(this.editableTabsValue)].images.splice(this.scriptFormImagesIndex,1,item)
+        let imgItem = JSON.parse(JSON.stringify(item)),imgList=this.creativeList[parseInt(this.editableTabsValue)].images;
+        imgItem.index = this.scriptFormImagesIndex;
+        imgItem.isReplaceable = imgList[this.scriptFormImagesIndex].isReplaceable;
+        delete imgItem.format;
+
+        this.creativeList[parseInt(this.editableTabsValue)].images.splice(this.scriptFormImagesIndex,1,imgItem)
       },
 
       //上传json文件修改config_url;
@@ -406,15 +433,20 @@
 
         let self = this;
         this.isLoading = true;
-        setTimeout(()=>{
-          self.isLoading = false
-        },1000)
+        this.saveLoading = true;
+        // setTimeout(()=>{
+        //   self.isLoading = false
+        // },1000)
 
         let _creative=[];
         this.creativeList.forEach(value=>{
           let _images=[];
           value.images.forEach(val=>{
-            _images.push(val.id)
+            _images.push({
+              id:val.id,
+              isReplaceable:val.isReplaceable,
+              index:val.index
+            })
           })
           if(value.areaRadio==="1"){
             _creative.push({
@@ -449,6 +481,7 @@
           }).then(res=>{
             if(res.return_code===1000){
               this.$message.success('修改成功...')
+              this.isLoading= false;
               this.$router.push({name:'creative-list'})
             }
           })
@@ -462,6 +495,7 @@
           }).then(res=>{
             if(res.return_code===1000){
               this.$message.success('保存成功...')
+              this.isLoading= false;
               this.$router.push({name:'creative-list'})
             }
           })
