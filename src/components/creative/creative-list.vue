@@ -121,9 +121,7 @@
     },
     created() {
       this.user_id = auth.getCookie('user_profile').id
-      // this.user_id = JSON.parse(window.sessionStorage.getItem("user_profile")).id;
       this.getList();
-      console.log(auth.getCookie("user_profile"))
     },
 
     methods: {

@@ -157,14 +157,13 @@
             <el-input v-model="group_name"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-button type="success" :loading="isLoading" @click="submitForm">保存</el-button>
+            <el-button type="success" @click="submitForm">保存</el-button>
           </el-form-item>
         </el-form>
       </div>
     </div>
 
     <my-material ref="myMaterial" @imageForm="getImageForm"></my-material>
-    <my-loading v-if="isLoading" :saveLoading="saveLoading"></my-loading>
   </div>
 </template>
 <script>
@@ -173,12 +172,10 @@
   import material from "./material";
   import {auth} from "../../api/auth";
   import axios from 'axios'
-  import loading from '../common/loading'
   export default {
     components:{
       'my-script':script,
       'my-material':material,
-      'my-loading':loading
     },
     data(){
       var self = this;
@@ -191,8 +188,6 @@
         }
       };
       return{
-        isLoading:false,
-        saveLoading:false,
         user_id:'',
         startOptions:[],//开始时间选项
         endOptions:[],//结束时间选项
@@ -218,7 +213,6 @@
             { validator: validateCreative_name, trigger: 'blur' }
           ]
         },
-
       }
     },
     filters:{
@@ -243,8 +237,12 @@
       }
       //修改创意组数据时
       if(this.$route.query.group_id){
-        this.isLoading=true;
-        this.saveLoading=false;
+     this.$loading({
+          lock: true,
+          text: 'Loading',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        })
         this.getAreaData(true);
       }else{
         this.getAreaData(false);
@@ -299,7 +297,13 @@
             }
           })
         }).then(()=>{
-          this.isLoading=false;
+          let isLoading = this.$loading({
+            lock: true,
+            text: 'Loading',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          })
+          isLoading.close();
           this.ruleForm.areaRadio = this.creativeList[0].areaRadio;
         })
 
@@ -347,7 +351,7 @@
       getScriptForm(val){
         this.scriptForm = val;
         this.script_id = val.id
-        console.log('this.script_id',this.script_id)
+        // console.log('this.script_id',this.script_id)
       },
       //创意移除
       removeTab(val){
@@ -365,7 +369,6 @@
           this.$message.info('请先选择创意脚本');
           return false
         }
-        console.log(this.scriptForm.images)
         this.creativeList.push(
           {
             name:'',
@@ -430,13 +433,13 @@
       },
 
       submitForm(formName) {
-
         let self = this;
-        this.isLoading = true;
-        this.saveLoading = true;
-        // setTimeout(()=>{
-        //   self.isLoading = false
-        // },1000)
+        const loading = this.$loading({
+          lock: true,
+          text: 'Loading',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
 
         let _creative=[];
         this.creativeList.forEach(value=>{
@@ -479,10 +482,12 @@
             landing_page_url:this.landing_page_url,
             creative:_creative
           }).then(res=>{
+            loading.close();
             if(res.return_code===1000){
               this.$message.success('修改成功...')
-              this.isLoading= false;
               this.$router.push({name:'creative-list'})
+            }else{
+              this.$message.error('提交失败...')
             }
           })
         }else{
@@ -493,10 +498,12 @@
             landing_page_url:this.landing_page_url,
             creative:_creative
           }).then(res=>{
+            loading.close();
             if(res.return_code===1000){
               this.$message.success('保存成功...')
-              this.isLoading= false;
               this.$router.push({name:'creative-list'})
+            }else{
+              this.$message.error('提交失败...')
             }
           })
         }

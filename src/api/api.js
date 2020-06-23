@@ -43,7 +43,7 @@ const prevErrHandler = ({response}) => {
       location.reload();
       break;
     case 500:
-      Message.error('系统异常')
+      errorMess()
       break;
     default:
   }
