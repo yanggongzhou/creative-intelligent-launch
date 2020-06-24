@@ -1,17 +1,20 @@
 <!--vue预览-->
 <template>
   <div>
-    <div>
-      总时长：{{time}}s <br/>
-      文件名：{{name}}<br/>
-    </div>
-    <el-button @click="previewBtn" plain>预览</el-button>
+<!--    <div>-->
+<!--      总时长：{{time}}s <br/>-->
+<!--      文件名：{{name}}<br/>-->
+<!--    </div>-->
+
 <!--    预览框-->
     <div class="previewBox"
     :style="{
       width:previewWidth+'px',
       height:previewHeight+'px',
     }">
+<!--      <div class="play-stop-icon" @click="previewBtn">-->
+<!--        <i class="playicon" :class="{'el-icon-video-play':stopIcon,'el-icon-video-pause':!stopIcon}"></i>-->
+<!--      </div>-->
 <!--      :duration="{enter: 60, leave: 60}"-->
 <!--      'animation-delay': item.startTime/1000+'s',-->
 <!--      'animation-duration': '0s',-->
@@ -34,10 +37,8 @@
           <img :src="item.content" class="preview-img" alt="">
         </div>
       </transition>
-
-
     </div>
-    <my-progress :min=0 :max=100 v-model = "per"></my-progress>
+
   </div>
 </template>
 
@@ -45,6 +46,7 @@
   import progress from "./progress";
   import JSZip from 'jszip';
   import JSZipUtils from 'jszip-utils';
+  import timer from "../../api/timer";
   export default{
     components:{
       'my-progress':progress
@@ -52,7 +54,7 @@
     data(){
       return{
         zipUrl:'https://large.magics-ad.com/ad-animation/1592551196110944.zip',
-        per:'',
+
 
         time:'',//总时长
         name:'',//文件名
@@ -161,13 +163,14 @@
       previewBtn(){
         let self = this;
         this.animateData.forEach((ani,ind)=>{
+
           setTimeout(()=>{
             self.animateData[ind].isShow = true;
             self.$forceUpdate()
-          }, ani.startTime);
+          }, ani.startTime,ani.id);
           setTimeout(()=>{
             self.animateData[ind].isShow = false
-          }, ani.endTime);
+          }, ani.endTime,ani.id);
         })
       },
 
@@ -182,9 +185,35 @@
     border-radius: 3px;
     margin: 0 auto;
     position: relative;
+    /*.play-stop-icon{*/
+    /*  position: absolute;*/
+    /*  font-size: 50px;*/
+    /*  height: 100%;*/
+    /*  width: 100%;*/
+    /*  display: flex;*/
+    /*  align-items: center;*/
+    /*  justify-content: center;*/
+    /*  cursor: pointer;*/
+    /*  transition: all .5s;*/
+    /*  z-index: 9999;*/
+    /*  .playicon{*/
+    /*    opacity: 0;*/
+    /*    color: #2296f3;*/
+    /*    transition: opacity .5s;*/
+    /*  }*/
+    /*  &:hover .playicon{*/
+    /*    opacity: 1;*/
+    /*    color: #cee8fd;*/
+    /*  }*/
+    /*}*/
+    /*&:hover .play-stop-icon{*/
+    /*  background: #0000005e;*/
+    /*}*/
   }
   .preview-img{
     width: 100%;
     height: 100%;
   }
+
+
 </style>

@@ -138,9 +138,19 @@
                   </el-col>
                   <el-col :span="8">
                     <span class="vintage">预览区:</span>
-                    <div class="previewBox">
-                      预览区
+                    <div class="animatePlayBox">
+                      <div class="previewContent">
+                        <my-preview ref="myPreview"></my-preview>
+                        <!--                      <my-progress class="progressBox"></my-progress>-->
+                      </div>
+                      <div class="controlContent clearfix">
+                        <div class="play-stop-icon float_left" @click="playBtn">
+                          <i class="playicon" :class="{'el-icon-video-play':stopIcon,'el-icon-video-pause':!stopIcon}"></i>
+                        </div>
+<!--                        <my-progress class="float_left"></my-progress>-->
+                      </div>
                     </div>
+
                   </el-col>
                 </el-row>
               </div>
@@ -170,12 +180,16 @@
   import {requestServices} from "../../api/api";
   import script from "./script";
   import material from "./material";
+  import preview from "../preview/preview";
+  import progress from "../preview/progress";
   import {auth} from "../../api/auth";
   import axios from 'axios'
   export default {
     components:{
       'my-script':script,
       'my-material':material,
+      'my-preview':preview,
+      'my-progress':progress,
     },
     data(){
       var self = this;
@@ -188,6 +202,8 @@
         }
       };
       return{
+        stopIcon:true,
+
         user_id:'',
         startOptions:[],//开始时间选项
         endOptions:[],//结束时间选项
@@ -540,6 +556,10 @@
         }else{
           this.$router.push({name:"creative-list"})
         }
+      },
+      playBtn(){
+        this.stopIcon=false;
+        this.$refs.myPreview[0].previewBtn();
       }
     }
   }
@@ -622,17 +642,41 @@
               width: 360px;
             }
           }
-
-          .previewBox{
-            width: 300px;
-            height: 450px;
-            border: 1px dashed #9E9E9E;
-            margin: 10px auto;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+          .animatePlayBox{
+            margin: 10px;
+            .previewContent{
+              width: 300px;
+              height: 533px;
+              border: 1px solid #9E9E9E;
+              margin: 0 auto;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .controlContent{
+              width: 300px;
+              height: 50px;
+              border: 1px solid #9E9E9E;
+              margin: 0 auto;
+              .play-stop-icon{
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 60px;
+                height: 100%;
+                font-size: 40px;
+                border-right: 1px solid #607D8B;
+                cursor: pointer;
+                .playicon{
+                  color: #2296f3;
+                  &:hover{
+                    color: #68bbfa;
+                  }
+                }
+              }
+            }
           }
+
         }
 
 
