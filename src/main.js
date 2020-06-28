@@ -7,6 +7,7 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/assets/css/main.css'
 import less from 'less'
+import store from './store';
 
 Vue.use(ElementUI,{ size: 'small' })
 Vue.use(less)
@@ -15,6 +16,7 @@ Vue.config.productionTip = false
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
+  store,
   router,
   components: { App },
   template: '<App/>'

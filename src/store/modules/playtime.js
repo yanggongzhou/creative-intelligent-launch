@@ -1,17 +1,19 @@
 
 const state = {
-  timeRecord:'',//当前预览动画的开始时间节点
+  stopIcon:false,//播放按钮默认false 播放
+
   alreadyPlayTime:0,//当前预览动画已播放的时间
+
 }
 
 //获取数据 getters
 const getters = {
-  TimeRecord      : state => state.timeRecord,
+  StopIcon      : state => state.stopIcon,
   AlreadyPlayTime : state => state.alreadyPlayTime,
 }
 const mutations = {
-  update_TimeRecord (state, data) {
-    state.timeRecord =  data ? data  : false;
+  update_StopIcon (state, data) {
+    state.stopIcon =  data ;
   },
   update_AlreadyPlayTime (state, data) {
     state.alreadyPlayTime =  data ? data  : false;

@@ -12,9 +12,9 @@
       width:previewWidth+'px',
       height:previewHeight+'px',
     }">
-      <div style="font-size: 20px;position: absolute;top: -20px" class="play-stop-icon" @click="previewStart">
-        <i class="playicon" :class="{'el-icon-video-play':!stopIcon,'el-icon-video-pause':stopIcon}"></i>
-      </div>
+<!--      <div style="font-size: 20px;position: absolute;top: -20px" class="play-stop-icon" @click="previewBtn">-->
+<!--        <i class="playicon" :class="{'el-icon-video-play':!stopIcon,'el-icon-video-pause':stopIcon}"></i>-->
+<!--      </div>-->
 <!--      :duration="{enter: 60, leave: 60}"-->
 <!--      'animation-delay': item.startTime/1000+'s',-->
 <!--      'animation-duration': '0s',-->
@@ -54,13 +54,12 @@
     },
     computed: {
       ...mapGetters([
-        'TimeRecord',
+        'StopIcon',
       ])
     },
     data(){
       return{
         zipUrl:'https://large.magics-ad.com/ad-animation/1592551196110944.zip',
-        stopIcon:false,
 
         time:'',//总时长
         name:'',//文件名
@@ -72,11 +71,7 @@
         jsonContent:'',//zip的JSON文件
         zipFileLength:'',//zip-files的长度
         animateData:[],//动画数据
-
-        pageTimer:{},//定时器数据
-        alreadyPlayTime:0,//已播放的时间
-
-
+        overAnimation:false,//是否播放完成
       }
     },
     watch:{
@@ -89,10 +84,6 @@
     },
     created() {
       this.getZip()
-      timer.setTimeout(()=>{console.log('wode timer')},500,'id')
-      setTimeout(()=>{
-        timer.pause('id')
-      },300)
     },
     methods:{
       getZip(){
@@ -156,63 +147,49 @@
             }
           })
         })
+        this.renderingAnimation()
         console.log('当前画布的渲染数据',this.animateData)
       },
-      //预览
-      previewStart(){
-        if(this.stopIcon){
-          this.stopIcon=false;
-          this.previewStop();
-          return false
-        }else{
-          this.stopIcon=true;
-        }
-        if(!this.alreadyPlayTime){
-          this.alreadyPlayTime = 0;
-        }
-
-
-        this.timeRecord = new Date().getTime();
+      //渲染动画
+      renderingAnimation(){
         let self = this;
-        if(this.alreadyPlayTime>this.jsonContent.time){
-        }
         this.animateData.forEach((ani,ind)=>{
           if(ani.isSetTimeout){
-            this.pageTimer['indStart'+ind] = timer.setTimeout(()=>{
+            timer.setTimeout(()=>{
               self.animateData[ind].isShow = true;
               self.$forceUpdate()
-            }, ani.startPlayTime);
-            this.pageTimer['indEnd'+ind] = setTimeout(()=>{
+            }, ani.startTime,'indStart'+ind);
+            timer.setTimeout(()=>{
               self.animateData[ind].isShow = false
-            }, ani.endPlayTime);
+            }, ani.endTime,'indEnd'+ind);
           }
         })
+        this.overAnimation = false;
+        //计时播放总时间
+        timer.setTimeout(()=>{
+          // self.stopIcon=false;
+          self.$store.commit('update_StopIcon',false)
+          self.overAnimation = true;
+          timer.clean();
+        },this.jsonContent.time,'allTime')
+        timer.pauseAll();
       },
-      previewStop(){
-        for(let each in this.pageTimer){
-          clearTimeout(this.pageTimer[each]);
+      //预览
+      previewBtn(){
+        if(this.overAnimation){//播放完成后重新渲染动画
+          this.renderingAnimation();
         }
-
-        this.alreadyPlayTime = new Date().getTime()-this.timeRecord;
-
-        this.animateData.forEach((value,index)=>{
-          if(value.endTime<this.alreadyPlayTime){
-            this.animateData[index].isShow = false;
-            this.animateData[index].isSetTimeout = false
-          }else if(value.startTime<this.alreadyPlayTime&&value.endTime>this.alreadyPlayTime){
-            this.animateData[index].startPlayTime = 0;
-            this.animateData[index].endPlayTime = value.endTime - this.alreadyPlayTime;
-          }else{
-            this.animateData[index].startPlayTime = value.startTime - this.alreadyPlayTime;
-            this.animateData[index].endPlayTime = value.endTime - this.alreadyPlayTime;
-          }
-        })
-        console.log('this.alreadyPlayTime',this.alreadyPlayTime,this.animateData)
+        if(this.StopIcon){
+          this.$store.commit('update_StopIcon',false)
+          // this.stopIcon=false;
+          timer.pauseAll()
+          return false
+        }else{
+          this.$store.commit('update_StopIcon',true)
+          // this.stopIcon=true;
+          timer.playAll()
+        }
       },
-      getAlreadyPlayTime(){
-
-      },
-
     }
   }
 </script>

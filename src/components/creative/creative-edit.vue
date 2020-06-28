@@ -145,7 +145,7 @@
                       </div>
                       <div class="controlContent clearfix">
                         <div class="play-stop-icon float_left" @click="playBtn">
-                          <i class="playicon" :class="{'el-icon-video-play':!stopIcon,'el-icon-video-pause':stopIcon}"></i>
+                          <i class="playicon" :class="{'el-icon-video-play':!StopIcon,'el-icon-video-pause':StopIcon}"></i>
                         </div>
 <!--                        <my-progress class="float_left"></my-progress>-->
                       </div>
@@ -184,12 +184,18 @@
   import progress from "../preview/progress";
   import {auth} from "../../api/auth";
   import axios from 'axios'
+  import {mapGetters} from "vuex";
   export default {
     components:{
       'my-script':script,
       'my-material':material,
       'my-preview':preview,
       'my-progress':progress,
+    },
+    computed: {
+      ...mapGetters([
+        'StopIcon',
+      ])
     },
     data(){
       var self = this;
@@ -202,7 +208,6 @@
         }
       };
       return{
-        stopIcon:false,
 
         user_id:'',
         startOptions:[],//开始时间选项
@@ -558,13 +563,8 @@
         }
       },
       playBtn(){
-        if(this.stopIcon){
-          this.stopIcon=false;
-          this.$refs.myPreview[0].previewStop();
-        }else{
-          this.stopIcon=true;
-          this.$refs.myPreview[0].previewStart();
-        }
+        this.$refs.myPreview[0].previewBtn();
+        // this.commit('update_StopIcon',!this.StopIcon)
       },
 
     }
