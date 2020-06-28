@@ -12,9 +12,9 @@
       width:previewWidth+'px',
       height:previewHeight+'px',
     }">
-<!--      <div class="play-stop-icon" @click="previewBtn">-->
-<!--        <i class="playicon" :class="{'el-icon-video-play':stopIcon,'el-icon-video-pause':!stopIcon}"></i>-->
-<!--      </div>-->
+      <div style="font-size: 20px;position: absolute;top: -20px" class="play-stop-icon" @click="previewStart">
+        <i class="playicon" :class="{'el-icon-video-play':!stopIcon,'el-icon-video-pause':stopIcon}"></i>
+      </div>
 <!--      :duration="{enter: 60, leave: 60}"-->
 <!--      'animation-delay': item.startTime/1000+'s',-->
 <!--      'animation-duration': '0s',-->
@@ -46,15 +46,21 @@
   import progress from "./progress";
   import JSZip from 'jszip';
   import JSZipUtils from 'jszip-utils';
+  import { mapGetters } from 'vuex'
   import timer from "../../api/timer";
   export default{
     components:{
       'my-progress':progress
     },
+    computed: {
+      ...mapGetters([
+        'TimeRecord',
+      ])
+    },
     data(){
       return{
         zipUrl:'https://large.magics-ad.com/ad-animation/1592551196110944.zip',
-
+        stopIcon:false,
 
         time:'',//总时长
         name:'',//文件名
@@ -67,6 +73,10 @@
         zipFileLength:'',//zip-files的长度
         animateData:[],//动画数据
 
+        pageTimer:{},//定时器数据
+        alreadyPlayTime:0,//已播放的时间
+
+
       }
     },
     watch:{
@@ -74,32 +84,17 @@
         if(val.length===this.zipFileLength-1){
           this.animatePreview()
         }
-      }
+      },
+
     },
     created() {
       this.getZip()
+      timer.setTimeout(()=>{console.log('wode timer')},500,'id')
+      setTimeout(()=>{
+        timer.pause('id')
+      },300)
     },
     methods:{
-      beforeEnter: function(el) {
-        var delay = el.getAttribute("animate-delay"),
-          duration = el.getAttribute("animate-duration");
-        console.log("attr:" + delay, duration);
-        var cssObj = {
-          "animation-delay": delay,
-          "-webkit-animation-delay": delay,
-          "animation-duration": duration,
-          "-webkit-animation-duration": duration,
-          "visibility": "visible"
-        }
-        var getCssText = function(obj) {
-          var text = [];
-          for(var o in obj) {
-            text.push(o + ":" + obj[o])
-          }
-          return text.join(";")
-        }
-        el.style.cssText = getCssText(cssObj);
-      },
       getZip(){
         let self = this;
         JSZipUtils.getBinaryContent(this.zipUrl, function(err, data) {
@@ -151,6 +146,10 @@
         this.animateData = Object.assign([],this.jsonContent.param)
         this.animateData.forEach(ani=>{
           ani.isShow = false;//用于元素显示时间
+          ani.isSetTimeout = true;//用于元素是否执行计时器
+          ani.startPlayTime = ani.startTime;
+          ani.endPlayTime = ani.endTime;
+
           this.imgList.forEach(val=>{
             if(ani.name===val.fileName){
               ani.content = val.content
@@ -160,18 +159,58 @@
         console.log('当前画布的渲染数据',this.animateData)
       },
       //预览
-      previewBtn(){
-        let self = this;
-        this.animateData.forEach((ani,ind)=>{
+      previewStart(){
+        if(this.stopIcon){
+          this.stopIcon=false;
+          this.previewStop();
+          return false
+        }else{
+          this.stopIcon=true;
+        }
+        if(!this.alreadyPlayTime){
+          this.alreadyPlayTime = 0;
+        }
 
-          setTimeout(()=>{
-            self.animateData[ind].isShow = true;
-            self.$forceUpdate()
-          }, ani.startTime,ani.id);
-          setTimeout(()=>{
-            self.animateData[ind].isShow = false
-          }, ani.endTime,ani.id);
+
+        this.timeRecord = new Date().getTime();
+        let self = this;
+        if(this.alreadyPlayTime>this.jsonContent.time){
+        }
+        this.animateData.forEach((ani,ind)=>{
+          if(ani.isSetTimeout){
+            this.pageTimer['indStart'+ind] = timer.setTimeout(()=>{
+              self.animateData[ind].isShow = true;
+              self.$forceUpdate()
+            }, ani.startPlayTime);
+            this.pageTimer['indEnd'+ind] = setTimeout(()=>{
+              self.animateData[ind].isShow = false
+            }, ani.endPlayTime);
+          }
         })
+      },
+      previewStop(){
+        for(let each in this.pageTimer){
+          clearTimeout(this.pageTimer[each]);
+        }
+
+        this.alreadyPlayTime = new Date().getTime()-this.timeRecord;
+
+        this.animateData.forEach((value,index)=>{
+          if(value.endTime<this.alreadyPlayTime){
+            this.animateData[index].isShow = false;
+            this.animateData[index].isSetTimeout = false
+          }else if(value.startTime<this.alreadyPlayTime&&value.endTime>this.alreadyPlayTime){
+            this.animateData[index].startPlayTime = 0;
+            this.animateData[index].endPlayTime = value.endTime - this.alreadyPlayTime;
+          }else{
+            this.animateData[index].startPlayTime = value.startTime - this.alreadyPlayTime;
+            this.animateData[index].endPlayTime = value.endTime - this.alreadyPlayTime;
+          }
+        })
+        console.log('this.alreadyPlayTime',this.alreadyPlayTime,this.animateData)
+      },
+      getAlreadyPlayTime(){
+
       },
 
     }

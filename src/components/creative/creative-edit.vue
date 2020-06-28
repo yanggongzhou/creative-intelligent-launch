@@ -145,7 +145,7 @@
                       </div>
                       <div class="controlContent clearfix">
                         <div class="play-stop-icon float_left" @click="playBtn">
-                          <i class="playicon" :class="{'el-icon-video-play':stopIcon,'el-icon-video-pause':!stopIcon}"></i>
+                          <i class="playicon" :class="{'el-icon-video-play':!stopIcon,'el-icon-video-pause':stopIcon}"></i>
                         </div>
 <!--                        <my-progress class="float_left"></my-progress>-->
                       </div>
@@ -202,7 +202,7 @@
         }
       };
       return{
-        stopIcon:true,
+        stopIcon:false,
 
         user_id:'',
         startOptions:[],//开始时间选项
@@ -558,9 +558,15 @@
         }
       },
       playBtn(){
-        this.stopIcon=false;
-        this.$refs.myPreview[0].previewBtn();
-      }
+        if(this.stopIcon){
+          this.stopIcon=false;
+          this.$refs.myPreview[0].previewStop();
+        }else{
+          this.stopIcon=true;
+          this.$refs.myPreview[0].previewStart();
+        }
+      },
+
     }
   }
 </script>
