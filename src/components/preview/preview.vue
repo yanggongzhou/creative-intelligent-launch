@@ -46,17 +46,12 @@
   import progress from "./progress";
   import JSZip from 'jszip';
   import JSZipUtils from 'jszip-utils';
-  import { mapGetters } from 'vuex'
   import timer from "../../api/timer";
   export default{
     components:{
       'my-progress':progress
     },
-    computed: {
-      ...mapGetters([
-        'StopIcon',
-      ])
-    },
+
     data(){
       return{
         zipUrl:'https://large.magics-ad.com/ad-animation/1592551196110944.zip',
@@ -72,6 +67,8 @@
         zipFileLength:'',//zip-files的长度
         animateData:[],//动画数据
         overAnimation:false,//是否播放完成
+
+        StopIcon:false,
       }
     },
     watch:{
@@ -139,7 +136,7 @@
           ani.isShow = false;//用于元素显示时间
           ani.isSetTimeout = true;//用于元素是否执行计时器
           ani.startPlayTime = ani.startTime;
-          ani.endPlayTime = ani.endTime;
+          ani .endPlayTime = ani.endTime;
 
           this.imgList.forEach(val=>{
             if(ani.name===val.fileName){
@@ -167,8 +164,7 @@
         this.overAnimation = false;
         //计时播放总时间
         timer.setTimeout(()=>{
-          // self.stopIcon=false;
-          self.$store.commit('update_StopIcon',false)
+          self.stopIcon=false;
           self.overAnimation = true;
           timer.clean();
         },this.jsonContent.time,'allTime')
@@ -180,13 +176,11 @@
           this.renderingAnimation();
         }
         if(this.StopIcon){
-          this.$store.commit('update_StopIcon',false)
-          // this.stopIcon=false;
+          this.stopIcon=false;
           timer.pauseAll()
           return false
         }else{
-          this.$store.commit('update_StopIcon',true)
-          // this.stopIcon=true;
+          this.stopIcon=true;
           timer.playAll()
         }
       },

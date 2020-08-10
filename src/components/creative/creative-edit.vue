@@ -184,7 +184,6 @@
   import progress from "../preview/progress";
   import {auth} from "../../api/auth";
   import axios from 'axios'
-  import {mapGetters} from "vuex";
   export default {
     components:{
       'my-script':script,
@@ -192,11 +191,7 @@
       'my-preview':preview,
       'my-progress':progress,
     },
-    computed: {
-      ...mapGetters([
-        'StopIcon',
-      ])
-    },
+
     data(){
       var self = this;
       var validateCreative_name = (rule, value, callback) => {
@@ -208,6 +203,7 @@
         }
       };
       return{
+        StopIcon:false,
 
         user_id:'',
         startOptions:[],//开始时间选项
@@ -371,6 +367,7 @@
       //脚本组件传值
       getScriptForm(val){
         this.scriptForm = val;
+
         this.script_id = val.id
         // console.log('this.script_id',this.script_id)
       },
@@ -564,7 +561,6 @@
       },
       playBtn(){
         this.$refs.myPreview[0].previewBtn();
-        // this.commit('update_StopIcon',!this.StopIcon)
       },
 
     }
