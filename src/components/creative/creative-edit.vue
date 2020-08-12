@@ -28,38 +28,30 @@
               </span>
               <div class="tabContent">
                 <el-row :gutter="0">
-                  <el-col :span="16">
+                  <el-col :span="10">
                     <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="50px" >
-                    <div>
-                      <span class="vintage">创意名称:</span><br>
-                      <el-form-item label-width="0" prop="creative_name">
-                        <el-input v-model="val.name" max="10" class="w50 mtb10" placeholder="请输入创意名称"></el-input>
-                      </el-form-item>
-
-                    </div>
-
+                      <div>
+                        <span class="vintage">创意名称:</span><br>
+                        <el-form-item label-width="0" prop="creative_name">
+                          <el-input v-model="val.name" max="10" class="w50 mtb10" placeholder="请输入创意名称"></el-input>
+                        </el-form-item>
+                      </div>
                     <span class="vintage">素材区:</span>
                     <div class="scriptCard mtb10">
-                      <el-row :gutter="10">
-                        <div v-for="(item,index) in val.images" :key="index+'scr'">
-                          <el-col class="mt10" :span="8" v-if="item.isReplaceable===1" >
-                            <el-card class="card-item" :body-style="{ padding: '0px' }">
-                              <div class="bgImage" @click.stop="materialSelect(item)">
-                                <img style="width: 100%;height: 100%;" class="image" :src="item.image_url" alt="">
-                                <div class="bgImage_spine">点击更换图片<br>{{item.size}}</div>
-                              </div>
-                              <!--                        <div class="red-bl">16:{{item}}</div>-->
-                              <!--                        <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">-->
+                      <div v-for="(item,index) in val.images" :key="index+'scr'" class="card-div">
+                        <el-card class="card-item" v-if="item.isReplaceable===1" :body-style="{ padding: '0px' }">
+                          <div class="bgImage" @click.stop="materialSelect(item)">
+                            <img style="width: 100%;height: 100%;" class="image" :src="item.image_url" alt="">
+                            <div class="bgImage_spine">点击更换图片<br>{{item.size}}</div>
+                          </div>
+                          <!--                        <div class="red-bl">16:{{item}}</div>-->
+                          <!--                        <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">-->
 
-                              <div style="padding: 10px;font-size: 13px;text-align: center">
-                                <span>{{item.name}}</span>
-                              </div>
-                            </el-card>
-                          </el-col>
-                        </div>
-
-                      </el-row>
-
+                          <div style="padding: 10px;font-size: 13px;text-align: center">
+                            <span>{{item.name}}</span>
+                          </div>
+                        </el-card>
+                      </div>
                     </div>
 
                     <span class="vintage">文本声音:</span>
@@ -136,11 +128,12 @@
 
 
                   </el-col>
-                  <el-col :span="8">
+
+                  <el-col :span="14">
                     <span class="vintage">预览区:</span>
                     <div class="animatePlayBox">
                       <div class="previewContent">
-                        <my-preview ref="myPreview"></my-preview>
+                        <my-preview ref="myPreview" :imageList="imageList" :previewObj="previewObj"></my-preview>
                         <!--                      <my-progress class="progressBox"></my-progress>-->
                       </div>
                       <div class="controlContent clearfix">
@@ -173,7 +166,7 @@
       </div>
     </div>
 
-    <my-material ref="myMaterial" @imageForm="getImageForm"></my-material>
+    <my-material ref="myMaterial" @imageForm="getImageForm" @allImage="allImage"></my-material>
   </div>
 </template>
 <script>
@@ -203,6 +196,9 @@
         }
       };
       return{
+        imageList:[],//全部素材
+        previewObj:{},//预览数据
+
         StopIcon:false,
 
         user_id:'',
@@ -275,6 +271,8 @@
     },
     methods:{
       foucsTab(val){
+        this.previewObj  = this.creativeList[parseInt(val.name)];
+
         this.ruleForm.areaRadio = this.creativeList[parseInt(val.name)].areaRadio
       },
       radioChange(rad,ind){
@@ -291,7 +289,8 @@
           this.script_id = res.result.groups.script_id
           this.creativeList = res.result.groups.creative
           this.group_name = res.result.groups.name
-          this.landing_page_url = res.result.groups.landing_page_url
+          this.landing_page_url = res.result.groups.landing_page_url;
+
           this.creativeList.forEach((val,ind)=>{
             this.creativeList[ind].tabId = ind+'';
             if(val.area==="0"){
@@ -367,9 +366,8 @@
       //脚本组件传值
       getScriptForm(val){
         this.scriptForm = val;
-
+        console.log('this.scriptForm',this.scriptForm)
         this.script_id = val.id
-        // console.log('this.script_id',this.script_id)
       },
       //创意移除
       removeTab(val){
@@ -400,6 +398,7 @@
 
             areaRadio:"0",//不限or地域选择
             cascaderArea:[],//地域绑定值
+
           },
         )
 
@@ -410,6 +409,10 @@
         this.scriptFormImagesItem = item;
         this.scriptFormImagesIndex = item.index;
         this.$refs.myMaterial.materialSelect()
+      },
+      //全部素材
+      allImage(val){
+        this.imageList = val;
       },
       //素材确认
       getImageForm(item){
@@ -571,7 +574,7 @@
     margin-bottom: 50px;
     .material{
       .material-card{
-        background: #fff;
+        /*background: #fff;*/
         min-height: 200px;
         padding: 15px;
         position: relative;
@@ -583,19 +586,23 @@
         .tabContent{
           min-width: 950px;
           .scriptCard {
-            max-height: 390px;
-            min-height: 200px;
-            overflow-y: scroll;
-            overflow-x: hidden;
             padding: 10px;
             border: 1px solid gainsboro;
-            width: 600px;
+            background: #fff;
+            font-size: 0;
+            max-height: 440px;
+            overflow-y: scroll;
+            .card-div{
+              display: inline-block;
+            }
             .card-item {
               position: relative;
+              width: 130px;
+              margin: 5px;
               .bgImage{
                 position: relative;
                 width: 100%;
-                height: 140px;
+                height: 100px;
                 /*background: url("https://images.magicscorp.com/Mimg/bms/parallax.jpg") no-repeat;*/
                 /*background-size:cover ;*/
                 .bgImage_spine{
@@ -647,18 +654,25 @@
           .animatePlayBox{
             margin: 10px;
             .previewContent{
-              width: 300px;
-              height: 533px;
+              width: 633px;
+              height: 356px;
               border: 1px solid #9E9E9E;
               margin: 0 auto;
               display: flex;
               align-items: center;
               justify-content: center;
+              background-image: linear-gradient(white 0.5px,transparent 0),
+              linear-gradient(90deg, white 0.5px,transparent 0),
+              linear-gradient(hsla(0,0%,100%,.3) 1px,transparent 0),
+              linear-gradient(90deg,hsla(0,0%,100%,.3) 1px,transparent 0);
+              background-size:75px 75px,75px 75px,15px 15px,15px 15px;
             }
             .controlContent{
-              width: 300px;
+              width: 633px;
               height: 50px;
-              border: 1px solid #9E9E9E;
+              border-left: 1px solid #9E9E9E;
+              border-right: 1px solid #9E9E9E;
+              border-bottom: 1px solid #9E9E9E;
               margin: 0 auto;
               .play-stop-icon{
                 display: flex;

@@ -127,6 +127,7 @@
         })
         .then(res=>{
           this.imageList = res.result.images
+          this.$emit('allImage',this.imageList)
         })
       },
       //卡片选择图片

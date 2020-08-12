@@ -1,23 +1,12 @@
 <!--vue预览-->
 <template>
   <div>
-<!--    <div>-->
-<!--      总时长：{{time}}s <br/>-->
-<!--      文件名：{{name}}<br/>-->
-<!--    </div>-->
-
 <!--    预览框-->
     <div class="previewBox"
     :style="{
       width:previewWidth+'px',
       height:previewHeight+'px',
     }">
-<!--      <div style="font-size: 20px;position: absolute;top: -20px" class="play-stop-icon" @click="previewBtn">-->
-<!--        <i class="playicon" :class="{'el-icon-video-play':!stopIcon,'el-icon-video-pause':stopIcon}"></i>-->
-<!--      </div>-->
-<!--      :duration="{enter: 60, leave: 60}"-->
-<!--      'animation-delay': item.startTime/1000+'s',-->
-<!--      'animation-duration': '0s',-->
       <transition  v-for="(item,ind) in animateData"
                    :key="ind+'ani'"
                    enter-active-class="animated fadeIn"
@@ -51,7 +40,9 @@
     components:{
       'my-progress':progress
     },
-
+    props:{
+      previewObj:Object,
+    },
     data(){
       return{
         zipUrl:'https://large.magics-ad.com/ad-animation/1592551196110944.zip',
@@ -60,8 +51,8 @@
         name:'',//文件名
 
         imgList:[],//zip全部图片素材
-        previewWidth:800,
-        previewHeight:450,
+        previewWidth:633,
+        previewHeight:356,
 
         jsonContent:'',//zip的JSON文件
         zipFileLength:'',//zip-files的长度
@@ -77,15 +68,15 @@
           this.animatePreview()
         }
       },
-
     },
     created() {
-      this.getZip()
+
+      this.getZip(this.zipUrl);
     },
     methods:{
-      getZip(){
+      getZip(scriptUrl){
         let self = this;
-        JSZipUtils.getBinaryContent(this.zipUrl, function(err, data) {
+        JSZipUtils.getBinaryContent(scriptUrl, function(err, data) {
           if(err) {
             throw err;
           }
@@ -105,7 +96,6 @@
                     })
                   })
                 }
-
                 if (/\.(json)$/.test(zip.files[key].name)) { // 判断是否是json文件
                   let base = zip.file(zip.files[key].name).async(
                     'string') // 以字符串形式输出文本内容
@@ -124,8 +114,8 @@
         console.log('当前画布的JSON数据',this.jsonContent)
         // 画布尺寸
         if(this.jsonContent.scene_width==='9'&&this.jsonContent.scene_height=='16'){
-          this.previewWidth = 300
-          this.previewHeight = 533
+          this.previewWidth = 200
+          this.previewHeight = 356
         }else{
           this.previewWidth = 300
           this.previewHeight = 168.75
@@ -136,7 +126,7 @@
           ani.isShow = false;//用于元素显示时间
           ani.isSetTimeout = true;//用于元素是否执行计时器
           ani.startPlayTime = ani.startTime;
-          ani .endPlayTime = ani.endTime;
+          ani.endPlayTime = ani.endTime;
 
           this.imgList.forEach(val=>{
             if(ani.name===val.fileName){
@@ -147,6 +137,8 @@
         this.renderingAnimation()
         console.log('当前画布的渲染数据',this.animateData)
       },
+
+
       //渲染动画
       renderingAnimation(){
         let self = this;
@@ -189,36 +181,11 @@
 </script>
 <style lang="less" scoped>
   .previewBox{
-    /*width: 800px;*/
-    /*height: 450px;*/
     background: white;
     border-radius: 3px;
     margin: 0 auto;
     position: relative;
-    /*.play-stop-icon{*/
-    /*  position: absolute;*/
-    /*  font-size: 50px;*/
-    /*  height: 100%;*/
-    /*  width: 100%;*/
-    /*  display: flex;*/
-    /*  align-items: center;*/
-    /*  justify-content: center;*/
-    /*  cursor: pointer;*/
-    /*  transition: all .5s;*/
-    /*  z-index: 9999;*/
-    /*  .playicon{*/
-    /*    opacity: 0;*/
-    /*    color: #2296f3;*/
-    /*    transition: opacity .5s;*/
-    /*  }*/
-    /*  &:hover .playicon{*/
-    /*    opacity: 1;*/
-    /*    color: #cee8fd;*/
-    /*  }*/
-    /*}*/
-    /*&:hover .play-stop-icon{*/
-    /*  background: #0000005e;*/
-    /*}*/
+
   }
   .preview-img{
     width: 100%;
