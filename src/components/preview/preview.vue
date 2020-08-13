@@ -57,17 +57,7 @@
         StopIcon:false,
       }
     },
-    watch:{
-      previewObj: {
-        handler(newValue, oldValue) {
-          let self = this;
-          this.animatePreview()
-        },
-        deep: true
-      }
-    },
-    created() {
-    },
+
     mounted() {
       this.animatePreview()
     },
@@ -121,24 +111,19 @@
         //计时播放总时间
         timer.setTimeout(()=>{
           self.stopIcon=false;
-          // timer.clean();
+          self.$emit('getStopIcon',false)
           console.log(self.animateData)
         }, self.time)
-        // timer.pauseAll();
-
       },
       //预览
       previewBtn(){
+        timer.clean();
+        this.animateData.forEach((ani,ind)=>{
+          ani.isShow = false;
+        })
         this.renderingAnimation();
-
-        // if(this.StopIcon){
-        //   this.stopIcon=false;
-        //   timer.pauseAll()
-        //   return false
-        // }else{
-        //   this.stopIcon=true;
-        //   timer.playAll()
-        // }
+        this.StopIcon = true;
+        this.$emit('getStopIcon',true)
       },
     }
   }

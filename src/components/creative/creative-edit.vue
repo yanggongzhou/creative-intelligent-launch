@@ -132,7 +132,7 @@
                         </el-card>
                       </div>
                     </div>
-                  <el-button type="primary" @click="previewVisible=!previewVisible">预览</el-button>
+                  <el-button type="primary" @click="previewBtn">预览</el-button>
 
                   </el-col>
                 </el-row>
@@ -169,15 +169,19 @@
       </div>
       <div class="animatePlayBox">
         <div class="previewContent">
-          <my-preview ref="myPreview" :previewObj="previewObj"></my-preview>
+          <my-preview @getStopIcon="getStopIcon" ref="myPreview" :previewObj="previewObj"></my-preview>
           <!--                      <my-progress class="progressBox"></my-progress>-->
         </div>
-        <div class="controlContent clearfix">
-          <div class="play-stop-icon float_left" @click="playBtn">
-            <i class="playicon" :class="{'el-icon-video-play':!StopIcon,'el-icon-video-pause':StopIcon}"></i>
-          </div>
-          <!--                        <my-progress class="float_left"></my-progress>-->
+        <div style="text-align: right;margin-top: 20px;width: 633px">
+          <el-button @click="playBtn">播放</el-button>
         </div>
+
+<!--        <div class="controlContent clearfix">-->
+<!--          <div class="play-stop-icon float_left" @click="playBtn">-->
+<!--            <i class="playicon" :class="{'el-icon-video-play':!StopIcon,'el-icon-video-pause':StopIcon}"></i>-->
+<!--          </div>-->
+<!--          &lt;!&ndash;                        <my-progress class="float_left"></my-progress>&ndash;&gt;-->
+<!--        </div>-->
       </div>
     </el-dialog>
   </div>
@@ -289,6 +293,9 @@
       window.onbeforeunload=null;
     },
     methods:{
+      getStopIcon(val){
+        this.StopIcon=val;
+      },
       foucsTab(val){
         this.ruleForm.areaRadio = this.creativeList[parseInt(val.name)].areaRadio
       },
@@ -570,14 +577,16 @@
           this.$router.push({name:"creative-list"})
         }
       },
-      playBtn1(){
+      previewBtn(){
+        let self = this;
         this.previewVisible = true;
-
+        setTimeout(()=>{
+          self.$refs.myPreview.previewBtn();
+        },300)
       },
       playBtn(){
         this.$refs.myPreview.previewBtn();
       }
-
     }
   }
 </script>
@@ -679,8 +688,8 @@
 
   /deep/.el-dialog__header {
     padding: 12px 10px 12px !important;
-    box-shadow: 0 2px 8px 2px #a09f9f;
-    background: #292961 !important;
+    box-shadow: 0 1px 3px 1px #a09f9f;
+    background: #5f677d !important;
   }
   /deep/.el-dialog__headerbtn .el-dialog__close{
     color: white;

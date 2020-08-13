@@ -117,6 +117,7 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
+      filter: blur(4px);
        .cover {
         /*filter: blur(10px);*/
         position: absolute;
