@@ -336,7 +336,6 @@
               })
               this.creativeList[ind].areaRadio = "1";
 
-              // console.log(this.creativeList)
             }
           })
         }).then(()=>{
@@ -429,7 +428,8 @@
           },
         )
 
-        this.editableTabsValue = this.creativeList.length-1+''
+        this.editableTabsValue = this.creativeList.length-1+'';
+        this.previewObj = JSON.parse(JSON.stringify(this.creativeList[parseInt(this.editableTabsValue)]))
       },
       //素材替换
       materialSelect(item){
@@ -609,7 +609,7 @@
             border: 1px solid gainsboro;
             background: #fff;
             font-size: 0;
-            height: 280px;
+            height: 420px;
             overflow-y: scroll;
             .card-div{
               display: inline-block;

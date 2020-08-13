@@ -57,7 +57,15 @@
         StopIcon:false,
       }
     },
-
+    watch:{
+      previewObj: {
+        handler(newValue, oldValue) {
+          let self = this;
+          this.animatePreview()
+        },
+        deep: true
+      }
+    },
     mounted() {
       this.animatePreview()
     },
