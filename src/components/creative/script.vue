@@ -152,6 +152,7 @@
   .scriptDiagBox{
     padding: 15px;
     background-color: #fff;
+    border: 0.5px solid #e0e0e0;
   }
   .chooseScript{
     .span_tip{

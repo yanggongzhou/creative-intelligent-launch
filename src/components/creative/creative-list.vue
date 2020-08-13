@@ -1,11 +1,12 @@
 <template>
   <div>
     <div class="btnBox">
-      <el-button type="success" size="small" icon="el-icon-plus" @click="addBtn" plain>新建创意</el-button>
+      <el-button type="primary" size="small" icon="el-icon-plus" @click="addBtn">新建创意</el-button>
       <!--      <el-button type="danger" size="small">删除</el-button>-->
     </div>
     <!--    @row-contextmenu="rowContextmenu"-->
     <el-table
+      border
       ref="tableBox"
       row-key='id'
       class="tableBox"
@@ -14,9 +15,9 @@
       :data="tableData"
       header-row-class-name="table_row"
       highlight-current-row
+      height="calc(100vh - 180px)"
       stripe
-      lazy
-      style="width: 100%">
+      lazy>
       <!--      type="index"-->
       <el-table-column
         type="index"
@@ -37,7 +38,7 @@
             @change="switchChange(scope)"
             :value="!scope.row.switch"
             active-color="#13ce66"
-            inactive-color="#ff4949">
+            inactive-color="#9E9E9E">
 
           </el-switch>
         </template>
@@ -47,7 +48,7 @@
         prop="id"
         align="center"
         label="组ID"
-        width="80">
+        width="100">
       </el-table-column>
       <el-table-column
         prop="name"
@@ -88,6 +89,8 @@
         </template>
       </el-table-column>
     </el-table>
+
+
 
 <!--    <el-pagination-->
 <!--      class="mt10"-->
@@ -198,10 +201,11 @@
 <style lang="less" scoped>
 
   .btnBox{
-    margin: 10px 0;
+    margin: 0px 40px;
   }
   .tableBox{
-
+    width: calc(100% - 80px);
+    margin: 20px 40px;
     .requirements_style{
       overflow: hidden;
       text-overflow:ellipsis;
@@ -210,7 +214,11 @@
 
   }
   /deep/.el-table th, .el-table tr{
-    background-color: #546179 !important;
+    background-color: #0a2240 !important;
     color: #fff;
   }
+  /deep/.el-table__fixed-right-patch {
+    background-color: #0a2240;
+  }
+
 </style>

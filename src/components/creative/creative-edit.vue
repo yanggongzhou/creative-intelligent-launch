@@ -587,7 +587,6 @@
     .material{
       .material-card{
         min-height: 200px;
-        padding: 15px;
         position: relative;
         .addtab_btn{
           position: absolute;
@@ -674,6 +673,7 @@
     padding-top: 20px;
     background: #fff;
     margin-top: 20px;
+    border: 0.5px solid #e0e0e0;
   }
 
 

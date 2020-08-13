@@ -81,8 +81,8 @@
   }
 
   .contentBox{
-    /*padding: 15px;*/
-    margin: 85px auto 0;
+    padding: 15px;
+    margin: 75px auto 0;
     max-width: 1200px;
     min-width: 600px;
     /*width: 90%;*/
