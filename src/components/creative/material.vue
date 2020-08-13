@@ -122,12 +122,11 @@
         requestServices.imageList({
           user_id: this.user_id,
           type:2,
-          is_all:1, //is_all：是否需要公共数据；0-需要；1-不需要
+          is_all:0, //is_all：是否需要公共数据；0-需要；1-不需要
           // format:parseInt(this.tabsValue)
         })
         .then(res=>{
           this.imageList = res.result.images
-          this.$emit('allImage',this.imageList)
         })
       },
       //卡片选择图片

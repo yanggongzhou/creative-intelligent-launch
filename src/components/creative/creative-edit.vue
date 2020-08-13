@@ -28,7 +28,7 @@
               </span>
               <div class="tabContent">
                 <el-row :gutter="0">
-                  <el-col :span="10">
+                  <el-col :span="12">
                     <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="50px" >
                       <div>
                         <span class="vintage">创意名称:</span><br>
@@ -36,23 +36,7 @@
                           <el-input v-model="val.name" max="10" class="w50 mtb10" placeholder="请输入创意名称"></el-input>
                         </el-form-item>
                       </div>
-                    <span class="vintage">素材区:</span>
-                    <div class="scriptCard mtb10">
-                      <div v-for="(item,index) in val.images" :key="index+'scr'" class="card-div">
-                        <el-card class="card-item" v-if="item.isReplaceable===1" :body-style="{ padding: '0px' }">
-                          <div class="bgImage" @click.stop="materialSelect(item)">
-                            <img style="width: 100%;height: 100%;" class="image" :src="item.image_url" alt="">
-                            <div class="bgImage_spine">点击更换图片<br>{{item.size}}</div>
-                          </div>
-                          <!--                        <div class="red-bl">16:{{item}}</div>-->
-                          <!--                        <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">-->
 
-                          <div style="padding: 10px;font-size: 13px;text-align: center">
-                            <span>{{item.name}}</span>
-                          </div>
-                        </el-card>
-                      </div>
-                    </div>
 
                     <span class="vintage">文本声音:</span>
                     <div>
@@ -129,20 +113,26 @@
 
                   </el-col>
 
-                  <el-col :span="14">
-                    <span class="vintage">预览区:</span>
-                    <div class="animatePlayBox">
-                      <div class="previewContent">
-                        <my-preview ref="myPreview" :imageList="imageList" :previewObj="previewObj"></my-preview>
-                        <!--                      <my-progress class="progressBox"></my-progress>-->
-                      </div>
-                      <div class="controlContent clearfix">
-                        <div class="play-stop-icon float_left" @click="playBtn">
-                          <i class="playicon" :class="{'el-icon-video-play':!StopIcon,'el-icon-video-pause':StopIcon}"></i>
-                        </div>
-<!--                        <my-progress class="float_left"></my-progress>-->
+                  <el-col :span="12">
+
+                    <span class="vintage">素材区:</span>
+                    <div class="scriptCard mtb10">
+                      <div v-for="(item,index) in val.images" :key="index+'scr'" class="card-div">
+                        <el-card class="card-item" v-if="item.isReplaceable===1" :body-style="{ padding: '0px' }">
+                          <div class="bgImage" @click.stop="materialSelect(item)">
+                            <img style="width: 100%;height: 100%;" class="image" :src="item.image_url" alt="">
+                            <div class="bgImage_spine">点击更换图片<br>{{item.size}}</div>
+                          </div>
+                          <!--                        <div class="red-bl">16:{{item}}</div>-->
+                          <!--                        <img src="https://images.magicscorp.com/Mimg/bms/parallax.jpg" class="image">-->
+
+                          <div style="padding: 10px;font-size: 13px;text-align: center">
+                            <span>{{item.name}}</span>
+                          </div>
+                        </el-card>
                       </div>
                     </div>
+                  <el-button type="primary" @click="previewVisible=!previewVisible">预览</el-button>
 
                   </el-col>
                 </el-row>
@@ -166,7 +156,30 @@
       </div>
     </div>
 
-    <my-material ref="myMaterial" @imageForm="getImageForm" @allImage="allImage"></my-material>
+    <my-material ref="myMaterial" @imageForm="getImageForm"></my-material>
+
+
+    <el-dialog
+      :visible.sync="previewVisible"
+      width="800px"
+      center>
+      <div slot="title" style="text-align: center;color: white">
+        预览创意
+        <span v-show="previewObj.name">--{{previewObj.name}}</span>
+      </div>
+      <div class="animatePlayBox">
+        <div class="previewContent">
+          <my-preview ref="myPreview" :previewObj="previewObj"></my-preview>
+          <!--                      <my-progress class="progressBox"></my-progress>-->
+        </div>
+        <div class="controlContent clearfix">
+          <div class="play-stop-icon float_left" @click="playBtn">
+            <i class="playicon" :class="{'el-icon-video-play':!StopIcon,'el-icon-video-pause':StopIcon}"></i>
+          </div>
+          <!--                        <my-progress class="float_left"></my-progress>-->
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -196,7 +209,7 @@
         }
       };
       return{
-        imageList:[],//全部素材
+        previewVisible:false,
         previewObj:{},//预览数据
 
         StopIcon:false,
@@ -248,9 +261,11 @@
           label:j+':00'
         })
       }
+    },
+    mounted() {
       //修改创意组数据时
       if(this.$route.query.group_id){
-     this.$loading({
+        this.$loading({
           lock: true,
           text: 'Loading',
           spinner: 'el-icon-loading',
@@ -260,19 +275,21 @@
       }else{
         this.getAreaData(false);
       }
-    },
-    mounted() {
+
       window.onbeforeunload = function () {
         return "退出?";
       };
+    },
+    watch:{
+      editableTabsValue(val){
+        this.previewObj  = JSON.parse(JSON.stringify(this.creativeList[parseInt(this.editableTabsValue)]))
+      },
     },
     beforeDestroy() {
       window.onbeforeunload=null;
     },
     methods:{
       foucsTab(val){
-        this.previewObj  = this.creativeList[parseInt(val.name)];
-
         this.ruleForm.areaRadio = this.creativeList[parseInt(val.name)].areaRadio
       },
       radioChange(rad,ind){
@@ -282,10 +299,12 @@
 
       //获取创意组详情
       getSingleZu(){
+        let self = this;
         requestServices.SingleZu({
           user_id:this.user_id,
           group_id:this.$route.query.group_id
         }).then(res=>{
+          this.previewObj = res.result.groups.creative[0];
           this.script_id = res.result.groups.script_id
           this.creativeList = res.result.groups.creative
           this.group_name = res.result.groups.name
@@ -309,6 +328,7 @@
 
               })
               this.creativeList[ind].areaRadio = "1";
+
               // console.log(this.creativeList)
             }
           })
@@ -410,10 +430,7 @@
         this.scriptFormImagesIndex = item.index;
         this.$refs.myMaterial.materialSelect()
       },
-      //全部素材
-      allImage(val){
-        this.imageList = val;
-      },
+
       //素材确认
       getImageForm(item){
         let scriptJson;
@@ -450,6 +467,7 @@
         requestServices.uploadFile(fd)
           .then(res=>{
             this.creativeList[parseInt(this.editableTabsValue)].config_url = res.result.upload_url;
+            this.previewObj  = JSON.parse(JSON.stringify(this.creativeList[parseInt(this.editableTabsValue)]))
           })
       },
 
@@ -528,16 +546,6 @@
             }
           })
         }
-
-
-        // this.$refs[formName].validate((valid) => {
-        //   if (valid) {
-        //
-        //   } else {
-        //     // this.$message.error("表单未验证通过，提交失败！")
-        //     return false;
-        //   }
-        // });
       },
 
       //返回上一页
@@ -562,9 +570,13 @@
           this.$router.push({name:"creative-list"})
         }
       },
-      playBtn(){
-        this.$refs.myPreview[0].previewBtn();
+      playBtn1(){
+        this.previewVisible = true;
+
       },
+      playBtn(){
+        this.$refs.myPreview.previewBtn();
+      }
 
     }
   }
@@ -574,7 +586,6 @@
     margin-bottom: 50px;
     .material{
       .material-card{
-        /*background: #fff;*/
         min-height: 200px;
         padding: 15px;
         position: relative;
@@ -590,7 +601,7 @@
             border: 1px solid gainsboro;
             background: #fff;
             font-size: 0;
-            max-height: 440px;
+            height: 280px;
             overflow-y: scroll;
             .card-div{
               display: inline-block;
@@ -603,8 +614,6 @@
                 position: relative;
                 width: 100%;
                 height: 100px;
-                /*background: url("https://images.magicscorp.com/Mimg/bms/parallax.jpg") no-repeat;*/
-                /*background-size:cover ;*/
                 .bgImage_spine{
                   position: absolute;
                   z-index: 11;
@@ -625,23 +634,6 @@
                   opacity: 0.9;
                 }
               }
-              /*.red-bl {*/
-              /*  display: inline-block;*/
-              /*  width: 80px;*/
-              /*  height: 16px;*/
-              /*  position: absolute;*/
-              /*  top: 5px;*/
-              /*  background: red;*/
-              /*  right: -23px;*/
-              /*  transform: rotateZ(45deg);*/
-              /*  color: white;*/
-              /*  text-align: center;*/
-              /*  font-size: 13px;*/
-              /*}*/
-
-              /*.image {*/
-              /*  width: 100%;*/
-              /*}*/
             }
           }
 
@@ -649,47 +641,6 @@
             /*width: 50%;*/
             .cascader_panel{
               width: 360px;
-            }
-          }
-          .animatePlayBox{
-            margin: 10px;
-            .previewContent{
-              width: 633px;
-              height: 356px;
-              border: 1px solid #9E9E9E;
-              margin: 0 auto;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              background-image: linear-gradient(white 0.5px,transparent 0),
-              linear-gradient(90deg, white 0.5px,transparent 0),
-              linear-gradient(hsla(0,0%,100%,.3) 1px,transparent 0),
-              linear-gradient(90deg,hsla(0,0%,100%,.3) 1px,transparent 0);
-              background-size:75px 75px,75px 75px,15px 15px,15px 15px;
-            }
-            .controlContent{
-              width: 633px;
-              height: 50px;
-              border-left: 1px solid #9E9E9E;
-              border-right: 1px solid #9E9E9E;
-              border-bottom: 1px solid #9E9E9E;
-              margin: 0 auto;
-              .play-stop-icon{
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 60px;
-                height: 100%;
-                font-size: 40px;
-                border-right: 1px solid #607D8B;
-                cursor: pointer;
-                .playicon{
-                  color: #2296f3;
-                  &:hover{
-                    color: #68bbfa;
-                  }
-                }
-              }
             }
           }
 
@@ -745,11 +696,14 @@
     border-right: .5px solid #e0e0e0;
     border-bottom: .5px solid #e0e0e0;
     border-left: .5px solid #e0e0e0;
+    background: white;
   }
   /deep/.el-tabs__header{
     margin: 0;
   }
-
+  /deep/.el-tabs--card>.el-tabs__header .el-tabs__item.is-active{
+    background: white;
+  }
   .diag-title{
     color: white;
     letter-spacing: 2px;
@@ -789,6 +743,48 @@
     font-size: 20px;
     &:hover{
       background-color: #3a74a2;
+    }
+  }
+
+  .animatePlayBox{
+    margin: 10px;
+    .previewContent{
+      width: 633px;
+      height: 356px;
+      border: 1px solid #9E9E9E;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: linear-gradient(white 0.5px,transparent 0),
+      linear-gradient(90deg, white 0.5px,transparent 0),
+      linear-gradient(hsla(0,0%,100%,.3) 1px,transparent 0),
+      linear-gradient(90deg,hsla(0,0%,100%,.3) 1px,transparent 0);
+      background-size:75px 75px,75px 75px,15px 15px,15px 15px;
+    }
+    .controlContent{
+      width: 633px;
+      height: 50px;
+      border-left: 1px solid #9E9E9E;
+      border-right: 1px solid #9E9E9E;
+      border-bottom: 1px solid #9E9E9E;
+      margin: 0 auto;
+      .play-stop-icon{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 100%;
+        font-size: 40px;
+        border-right: 1px solid #607D8B;
+        cursor: pointer;
+        .playicon{
+          color: #2296f3;
+          &:hover{
+            color: #68bbfa;
+          }
+        }
+      }
     }
   }
 </style>

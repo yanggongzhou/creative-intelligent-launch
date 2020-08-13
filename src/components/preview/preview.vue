@@ -21,7 +21,7 @@
           transform: 'scale('+item.scale+')'+' rotate('+item.rotation+'deg)'+' rotateY('+item.isMirror?180:0 +'deg)',
           top: previewHeight*item.pos.y+'px',
           left: previewWidth*item.pos.x+'px',
-          'z-index':item.zIndex,
+          'z-index':item.zIndex
         }">
           <img :src="item.content" class="preview-img" alt="">
         </div>
@@ -32,10 +32,12 @@
 </template>
 
 <script>
+  import { requestServices } from "../../api/api";
   import progress from "./progress";
   import JSZip from 'jszip';
   import JSZipUtils from 'jszip-utils';
   import timer from "../../api/timer";
+  import axios from 'axios'
   export default{
     components:{
       'my-progress':progress
@@ -45,136 +47,98 @@
     },
     data(){
       return{
-        zipUrl:'https://large.magics-ad.com/ad-animation/1592551196110944.zip',
-
         time:'',//总时长
         name:'',//文件名
 
-        imgList:[],//zip全部图片素材
         previewWidth:633,
         previewHeight:356,
 
-        jsonContent:'',//zip的JSON文件
-        zipFileLength:'',//zip-files的长度
         animateData:[],//动画数据
-        overAnimation:false,//是否播放完成
-
         StopIcon:false,
       }
     },
     watch:{
-      imgList(val){
-        if(val.length===this.zipFileLength-1){
+      previewObj: {
+        handler(newValue, oldValue) {
+          let self = this;
           this.animatePreview()
-        }
-      },
+        },
+        deep: true
+      }
     },
     created() {
-
-      this.getZip(this.zipUrl);
+    },
+    mounted() {
+      this.animatePreview()
     },
     methods:{
-      getZip(scriptUrl){
-        let self = this;
-        JSZipUtils.getBinaryContent(scriptUrl, function(err, data) {
-          if(err) {
-            throw err;
-          }
-          JSZip.loadAsync(data).then((zip)=> {
-            console.log('全部文件',zip)
-            self.zipFileLength=Object.keys(zip.files).length
-            for (let key in zip.files) {
-              if (!zip.files[key].dir) {// 判断是否是目录
-
-                if (/\.(png|jpg|jpeg|gif)$/.test(zip.files[key].name)) { // 判断是否是图片格式
-                  let base = zip.file(zip.files[key].name).async('base64') // 将图片转化为base64格式
-                  base.then(res => {
-                    self.imgList.push({
-                      fileName: zip.files[key].name,
-                      type: 'img',
-                      content: `data:image/png;base64,${res}`
-                    })
-                  })
-                }
-                if (/\.(json)$/.test(zip.files[key].name)) { // 判断是否是json文件
-                  let base = zip.file(zip.files[key].name).async(
-                    'string') // 以字符串形式输出文本内容
-                  base.then(res => {
-                    self.jsonContent = JSON.parse(res);
-                  })
-                }
-              }
-            }
-
-          })
-        })
-      },
       animatePreview(){
         let self = this;
-        console.log('当前画布的JSON数据',this.jsonContent)
-        // 画布尺寸
-        if(this.jsonContent.scene_width==='9'&&this.jsonContent.scene_height=='16'){
-          this.previewWidth = 200
-          this.previewHeight = 356
-        }else{
-          this.previewWidth = 300
-          this.previewHeight = 168.75
-        }
-        //渲染数据，添加content or url
-        this.animateData = Object.assign([],this.jsonContent.param)
-        this.animateData.forEach(ani=>{
-          ani.isShow = false;//用于元素显示时间
-          ani.isSetTimeout = true;//用于元素是否执行计时器
-          ani.startPlayTime = ani.startTime;
-          ani.endPlayTime = ani.endTime;
-
-          this.imgList.forEach(val=>{
-            if(ani.name===val.fileName){
-              ani.content = val.content
+        console.log('previewObj',this.previewObj.images)
+        return new Promise(resolve => {
+          axios.get(this.previewObj.config_url).then(res=>{
+            // 画布尺寸
+            if(res.data.scene_width==='9'&&res.data.scene_height==='16'){
+              self.previewWidth = 200.25
+              self.previewHeight = 356
+            }else{
+              self.previewWidth = 633
+              self.previewHeight = 356
             }
+            //渲染数据，添加content or url
+            let _animateData = JSON.parse(JSON.stringify(res.data.param))
+            _animateData.forEach((ani,aniInd)=>{
+              // ani.isShow = true ;//用于元素显示时间
+              self.previewObj.images.forEach(val=>{
+                if(ani.id===val.id){
+                  _animateData[aniInd].content = val.image_url
+                }
+              })
+            })
+            self.animateData = JSON.parse(JSON.stringify(_animateData));
+            resolve(self.animateData,res.data.time)
+            self.time = res.data.time
+            console.log('当前画布的渲染数据',self.animateData)
           })
         })
-        this.renderingAnimation()
-        console.log('当前画布的渲染数据',this.animateData)
       },
 
 
       //渲染动画
       renderingAnimation(){
         let self = this;
-        this.animateData.forEach((ani,ind)=>{
-          if(ani.isSetTimeout){
-            timer.setTimeout(()=>{
-              self.animateData[ind].isShow = true;
-              self.$forceUpdate()
-            }, ani.startTime,'indStart'+ind);
-            timer.setTimeout(()=>{
-              self.animateData[ind].isShow = false
-            }, ani.endTime,'indEnd'+ind);
-          }
+        self.animateData.forEach((ani,ind)=>{
+          timer.setTimeout(()=>{
+            ani.isShow = true;
+            self.$forceUpdate()
+          },  self.animateData[ind].startTime);
+          timer.setTimeout(()=>{
+            ani.isShow = false
+            self.$forceUpdate()
+          }, ani.endTime);
         })
-        this.overAnimation = false;
+
         //计时播放总时间
         timer.setTimeout(()=>{
           self.stopIcon=false;
-          self.overAnimation = true;
-          timer.clean();
-        },this.jsonContent.time,'allTime')
-        timer.pauseAll();
+          // timer.clean();
+          console.log(self.animateData)
+        }, self.time)
+        // timer.pauseAll();
+
       },
       //预览
       previewBtn(){
-        if(this.overAnimation){//播放完成后重新渲染动画
-          this.renderingAnimation();
-        }
-        if(this.StopIcon){
-          this.stopIcon=false;
-          timer.pauseAll()
-          return false
-        }else{
-          this.stopIcon=true;
-          timer.playAll()
-        }
+        this.renderingAnimation();
+
+        // if(this.StopIcon){
+        //   this.stopIcon=false;
+        //   timer.pauseAll()
+        //   return false
+        // }else{
+        //   this.stopIcon=true;
+        //   timer.playAll()
+        // }
       },
     }
   }
